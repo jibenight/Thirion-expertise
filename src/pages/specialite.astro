@@ -1,0 +1,46 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageShell from '../components/PageShell.astro';
+import Icon from '../components/Icon.astro';
+import CtaBand from '../components/CtaBand.astro';
+
+const items = [
+  {
+    icon: 'building',
+    title: 'Expertise de tous biens et droits immobiliers et commerciaux',
+    subtitle: 'Réalisées par ingénieur en Génie civil certifié n° 27001',
+    body: "Une approche rigoureuse permettant de déterminer la valeur d'un bien immobilier, d'un terrain, d'un local commercial ou de droits immobiliers spécifiques.",
+  },
+  {
+    icon: 'houseCrack',
+    title: 'Expertise préalable et après sinistre',
+    subtitle: "Réalisée par expert d'assuré",
+    body: "Analyse technique et économique du bien avant ou après sinistre afin d'accompagner les assurés dans la défense de leurs intérêts et l'évaluation des préjudices.",
+  },
+  {
+    icon: 'users',
+    title: 'Expertise conjointe avec rapport commun',
+    subtitle: "Associant le double regard technique de l'ingénieur expert du cabinet et le consultant expert Honoraire près la Cour d'appel d'Aix en Provence",
+    body: "Pour les dossiers sensibles ou complexes, une expertise conjointe permet de bénéficier d'une analyse renforcée et d'un rapport commun argumenté.",
+  },
+];
+---
+<Layout title="Spécialité — Évaluation et Estimation | THIRION EXPERTISE" description="Évaluation et estimation : expertise immobilière et commerciale, expertise préalable et après sinistre, expertise conjointe avec rapport commun.">
+  <PageShell eyebrow="Spécialité" title="Évaluation et Estimation">
+    <div class="divide-y divide-border">
+      {items.map((item, index) => (
+        <article class="motion-card grid gap-6 rounded-lg py-10 md:grid-cols-[auto_1fr] md:gap-10" data-reveal data-delay={(index % 3) + 1}>
+          <div class="motion-icon flex h-24 w-24 items-center justify-center rounded-full bg-brand-soft">
+            <Icon name={item.icon} class="h-10 w-10 stroke-[1.5] text-brand" />
+          </div>
+          <div class="max-w-2xl">
+            <h2 class="font-serif text-2xl font-semibold text-brand">{item.title}</h2>
+            <p class="mt-2 italic text-brand/80">{item.subtitle}</p>
+            <p class="mt-4 leading-relaxed text-foreground/80">{item.body}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </PageShell>
+  <CtaBand slot="prefooter" />
+</Layout>

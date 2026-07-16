@@ -1,0 +1,196 @@
+---
+// Carrousel du hero : fondu enchaîné, lecture automatique, flèches + puces.
+// Accessible (aria) et respectueux de prefers-reduced-motion (pas d'auto-défilement).
+import Icon from './Icon.astro';
+
+const { slides = [], interval = 6000 } = Astro.props;
+---
+<div
+  class="hero-slider relative overflow-hidden rounded-lg shadow-xl"
+  data-hero-slider
+  data-interval={interval}
+  aria-roledescription="carrousel"
+  aria-label="Photographies — expertise foncière, immobilière et commerciale"
+>
+  <div class="relative aspect-[16/10] bg-brand-soft">
+    {slides.map((slide, i) => (
+      <figure
+        class="hero-slide absolute inset-0 m-0"
+        data-slide
+        data-active={i === 0 ? 'true' : 'false'}
+        aria-hidden={i === 0 ? 'false' : 'true'}
+      >
+        <img
+          src={slide.src}
+          alt={slide.alt}
+          width="1600"
+          height="1000"
+          loading={i === 0 ? 'eager' : 'lazy'}
+          class="h-full w-full object-cover"
+        />
+      </figure>
+    ))}
+  </div>
+
+  {slides.length > 1 && (
+    <>
+      <button
+        type="button"
+        class="hero-arrow left-3"
+        data-prev
+        aria-label="Image précédente"
+      >
+        <Icon name="chevronLeft" class="h-5 w-5" />
+      </button>
+      <button
+        type="button"
+        class="hero-arrow right-3"
+        data-next
+        aria-label="Image suivante"
+      >
+        <Icon name="chevronRight" class="h-5 w-5" />
+      </button>
+
+      <div class="hero-dots" role="tablist" aria-label="Choisir une image">
+        {slides.map((_, i) => (
+          <button
+            type="button"
+            class="hero-dot"
+            data-dot
+            data-index={i}
+            role="tab"
+            aria-selected={i === 0 ? 'true' : 'false'}
+            aria-label={`Aller à l'image ${i + 1}`}
+          ></button>
+        ))}
+      </div>
+    </>
+  )}
+</div>
+
+<style>
+  .hero-slide {
+    opacity: 0;
+    transition: opacity 900ms ease;
+    z-index: 1;
+  }
+  .hero-slide[data-active='true'] {
+    opacity: 1;
+    z-index: 2;
+  }
+
+  .hero-arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.5rem;
+    width: 2.5rem;
+    transform: translateY(-50%);
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.82);
+    color: var(--brand);
+    box-shadow: 0 2px 10px rgba(26, 58, 126, 0.18);
+    opacity: 0;
+    transition: opacity 250ms ease, background 250ms ease;
+    backdrop-filter: blur(2px);
+  }
+  .hero-slider:hover .hero-arrow,
+  .hero-arrow:focus-visible {
+    opacity: 1;
+  }
+  .hero-arrow:hover {
+    background: #fff;
+  }
+
+  .hero-dots {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0.85rem;
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+  .hero-dot {
+    height: 0.4rem;
+    width: 0.4rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.55);
+    box-shadow: 0 1px 3px rgba(26, 58, 126, 0.35);
+    transition: width 300ms ease, background 300ms ease;
+  }
+  .hero-dot[aria-selected='true'] {
+    width: 1.15rem;
+    background: #fff;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-slide {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  function initSlider(root: HTMLElement) {
+    const slides = Array.from(root.querySelectorAll<HTMLElement>('[data-slide]'));
+    const dots = Array.from(root.querySelectorAll<HTMLElement>('[data-dot]'));
+    if (slides.length < 2) return;
+
+    const interval = Number(root.dataset.interval) || 6000;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let idx = Math.max(0, slides.findIndex((s) => s.dataset.active === 'true'));
+    let timer: ReturnType<typeof setInterval> | null = null;
+
+    function show(n: number) {
+      idx = (n + slides.length) % slides.length;
+      slides.forEach((s, i) => {
+        const active = i === idx;
+        s.dataset.active = active ? 'true' : 'false';
+        s.setAttribute('aria-hidden', active ? 'false' : 'true');
+      });
+      dots.forEach((d, i) => d.setAttribute('aria-selected', i === idx ? 'true' : 'false'));
+    }
+
+    function stop() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }
+    function start() {
+      if (reduce) return;
+      stop();
+      timer = setInterval(() => show(idx + 1), interval);
+    }
+
+    root.querySelector('[data-next]')?.addEventListener('click', () => {
+      show(idx + 1);
+      start();
+    });
+    root.querySelector('[data-prev]')?.addEventListener('click', () => {
+      show(idx - 1);
+      start();
+    });
+    dots.forEach((d, i) =>
+      d.addEventListener('click', () => {
+        show(i);
+        start();
+      })
+    );
+
+    root.addEventListener('mouseenter', stop);
+    root.addEventListener('mouseleave', start);
+    root.addEventListener('focusin', stop);
+    root.addEventListener('focusout', start);
+    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+
+    show(idx);
+    start();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-hero-slider]').forEach(initSlider);
+</script>

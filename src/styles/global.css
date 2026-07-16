@@ -1,0 +1,142 @@
+@import "tailwindcss" source(none);
+@source "../";
+@import "tw-animate-css";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-line: var(--brand-line);
+  --color-gold: var(--gold);
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+}
+
+:root {
+  --radius: 0.5rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.22 0.04 260);
+  --primary: oklch(0.32 0.11 260);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.97 0.01 250);
+  --secondary-foreground: oklch(0.32 0.11 260);
+  --muted: oklch(0.97 0.01 250);
+  --muted-foreground: oklch(0.5 0.02 260);
+  --accent: oklch(0.95 0.03 245);
+  --accent-foreground: oklch(0.32 0.11 260);
+  --border: oklch(0.9 0.02 250);
+  --ring: oklch(0.5 0.1 260);
+  --brand: #1a3a7e;
+  --brand-soft: #eaf1fb;
+  --brand-line: #2f5db4;
+  --gold: #c9a24a;
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  html { scroll-behavior: smooth; }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, .font-serif { font-family: var(--font-serif); }
+}
+
+/* Motion system — subtle and purposeful, applied at runtime so the page stays
+   fully readable without JavaScript, and fully disabled for reduced-motion. */
+@keyframes header-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.site-header {
+  animation: header-in 550ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+/* Card & icon base transitions (no hover lift). */
+.motion-card {
+  transition: transform 400ms cubic-bezier(.22, 1, .36, 1),
+    box-shadow 400ms cubic-bezier(.22, 1, .36, 1),
+    border-color 300ms ease;
+}
+
+.motion-icon {
+  transition: transform 400ms cubic-bezier(.22, 1, .36, 1),
+    background-color 300ms ease,
+    box-shadow 300ms ease;
+}
+
+/* Buttons: light sheen sweep and a small lift. */
+.motion-button {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 250ms ease, box-shadow 250ms ease, background-color 250ms ease;
+}
+
+.motion-button::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 25%, rgb(255 255 255 / 18%) 50%, transparent 75%);
+  content: "";
+  transform: translateX(-120%);
+  transition: transform 650ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.motion-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -16px rgb(26 58 126 / 65%);
+}
+
+.motion-button:hover::after { transform: translateX(120%); }
+
+/* Links: smooth colour change only (no vertical jump). */
+.motion-link { transition: color 250ms ease; }
+
+/* Images: subtle zoom on hover. */
+.motion-image img { transition: transform 700ms cubic-bezier(.22, 1, .36, 1); }
+.motion-image:hover img { transform: scale(1.04); }
+
+/* Scroll reveal — fade + short travel, staggered by data-delay. */
+.motion-ready [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 1rem, 0);
+  transition: opacity 600ms cubic-bezier(.22, 1, .36, 1),
+    transform 600ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.motion-ready [data-reveal="left"] { transform: translate3d(-1rem, 0, 0); }
+.motion-ready [data-reveal="right"] { transform: translate3d(1rem, 0, 0); }
+.motion-ready [data-reveal="scale"] { transform: scale(.97); }
+.motion-ready [data-reveal].is-visible { opacity: 1; transform: none; }
+.motion-ready [data-delay="1"] { transition-delay: 80ms; }
+.motion-ready [data-delay="2"] { transition-delay: 160ms; }
+.motion-ready [data-delay="3"] { transition-delay: 240ms; }
+.motion-ready [data-delay="4"] { transition-delay: 320ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}

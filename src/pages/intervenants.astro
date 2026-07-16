@@ -1,0 +1,65 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageShell from '../components/PageShell.astro';
+import Icon from '../components/Icon.astro';
+import CtaBand from '../components/CtaBand.astro';
+
+const people = [
+  {
+    img: '/images/david-thirion-retouched.jpg',
+    name: 'David THIRION',
+    role: [
+      'Expert principal du cabinet',
+      'Ingénieur en Génie civil spécialité évaluation immobilière',
+      'Certificat de compétence n°27001',
+      'Formation ICH 2006/2008',
+      "Expert d'assuré",
+    ],
+    quote: "Pour tous les dossiers d'évaluations immobilières et commerciales et expertise pour le compte des assurés",
+  },
+  {
+    img: '/images/thierry-thirion-retouched.jpg',
+    name: 'Thierry THIRION',
+    role: [
+      'Consultant indépendant',
+      "Expert honoraire près la cour d'appel d'Aix en Provence",
+      'Spécialité estimation immobilière et commerciale depuis 2000',
+    ],
+    quote: 'En exclusivité, intervenant co-expert pour vos dossiers les plus sensibles, un double regard technique et un rapport commun',
+  },
+];
+---
+<Layout title="Intervenants — THIRION EXPERTISE" description="David Thirion, expert principal du cabinet, et Thierry Thirion, expert honoraire près la Cour d'appel d'Aix-en-Provence.">
+  <PageShell eyebrow="Intervenants" title="Intervenant">
+    <div class="space-y-16">
+      {people.map((person, index) => (
+        <>
+          {index > 0 && <div class="h-px bg-border"></div>}
+          <article class="grid gap-8 md:grid-cols-[280px_1fr] md:gap-12" data-reveal>
+            <div class="motion-image overflow-hidden rounded-lg shadow-md">
+              <img
+                src={person.img}
+                alt={person.name}
+                loading="lazy"
+                width="800"
+                height="1000"
+                class="h-full w-full object-cover"
+              />
+            </div>
+            <div data-reveal="right" data-delay="1">
+              <h2 class="font-serif text-2xl font-semibold text-brand">{person.name}</h2>
+              <ul class="mt-4 space-y-1 leading-relaxed text-foreground/85">
+                {person.role.map((item) => <li>{item}</li>)}
+              </ul>
+              <blockquote class="motion-card relative mt-6 max-w-md rounded-md border border-brand/15 bg-brand-soft/60 p-5 pl-12">
+                <Icon name="quote" class="absolute left-4 top-4 h-6 w-6 text-brand" />
+                <p class="font-serif italic text-brand">« {person.quote} »</p>
+              </blockquote>
+            </div>
+          </article>
+        </>
+      ))}
+    </div>
+  </PageShell>
+  <CtaBand slot="prefooter" />
+</Layout>

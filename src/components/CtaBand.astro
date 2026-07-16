@@ -1,0 +1,39 @@
+---
+// Bandeau d'appel à l'action repris avant le pied de page (pattern des sites d'expertise).
+// Réutilise le texte du client (page Contact).
+import Icon from './Icon.astro';
+---
+<section class="relative border-t border-border bg-brand-soft/60">
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-y-0 right-6 hidden w-px bg-brand-line/60 md:block lg:right-10"
+  ></div>
+  <div class="mx-auto max-w-6xl px-6 py-14 md:py-16">
+    <div class="grid items-center gap-8 md:grid-cols-[1fr_auto]">
+      <div data-reveal>
+        <h2 class="font-serif text-3xl text-brand md:text-4xl">
+          Prendre rendez-vous ou demander un devis
+        </h2>
+        <p class="mt-3 max-w-2xl leading-relaxed text-foreground/80">
+          Nous vous invitons à nous contacter afin d'échanger sur votre dossier et définir
+          ensemble la mission la plus adaptée à votre situation.
+        </p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3" data-reveal data-delay="1">
+        <a
+          href="/contact/"
+          class="motion-button inline-flex items-center rounded-md bg-brand px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand/90"
+        >
+          <span class="relative z-10">Nous contacter</span>
+        </a>
+        <a
+          href="tel:+33695341070"
+          class="motion-link inline-flex items-center gap-2 rounded-md border border-brand/30 bg-white px-5 py-3 text-sm font-medium text-brand transition hover:bg-brand-soft"
+        >
+          <Icon name="phone" class="h-4 w-4" />
+          06 95 34 10 70
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,87 @@
+---
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+const year = new Date().getFullYear();
+const nav = [
+  { href: '/', label: 'Accueil' },
+  { href: '/specialite/', label: 'Spécialité' },
+  { href: '/domaine/', label: 'Domaine' },
+  { href: '/intervenants/', label: 'Intervenants' },
+  { href: '/contact/', label: 'Contact' },
+];
+---
+<footer class="bg-brand text-white">
+  <div class="mx-auto grid max-w-6xl gap-10 px-6 py-14 md:grid-cols-[1.5fr_1fr_1.4fr] md:gap-12">
+    <!-- Marque -->
+    <div>
+      <div class="flex items-center gap-3">
+        <span class="shrink-0 rounded-sm bg-white p-1">
+          <Logo size={30} />
+        </span>
+        <div class="min-w-0 font-serif text-lg font-semibold tracking-wide">THIRION EXPERTISE</div>
+      </div>
+      <p class="mt-5 max-w-xs text-sm leading-relaxed text-white/70">
+        Évaluation et estimation de tous biens et droits immobiliers et commerciaux, à Nîmes et
+        dans le ressort de la Cour d'Appel de Nîmes.
+      </p>
+      <a
+        href="https://www.linkedin.com/in/david-thirion-87b02639b"
+        target="_blank"
+        rel="noreferrer noopener"
+        class="mt-6 inline-flex h-10 w-10 items-center justify-center rounded-md bg-white text-brand transition hover:bg-white/85"
+        aria-label="LinkedIn David Thirion"
+      >
+        <Icon name="linkedin" class="h-5 w-5" />
+      </a>
+    </div>
+
+    <!-- Navigation -->
+    <nav aria-label="Pied de page">
+      <h2 class="text-xs font-semibold uppercase tracking-[0.18em] text-white/50">Navigation</h2>
+      <ul class="mt-4 space-y-2.5 text-sm">
+        {nav.map((item) => (
+          <li>
+            <a href={item.href} class="motion-link text-white/80 hover:text-white">{item.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <!-- Contact -->
+    <div>
+      <h2 class="text-xs font-semibold uppercase tracking-[0.18em] text-white/50">Contact</h2>
+      <ul class="mt-4 space-y-3.5 text-sm">
+        <li class="flex items-start gap-3">
+          <Icon name="mapPin" class="mt-0.5 h-5 w-5 shrink-0 text-white/50" />
+          <span class="leading-relaxed text-white/80">
+            35 rue des Chassaintes<br />
+            30900 NÎMES<br />
+            <span class="italic text-white/55">(sur rendez-vous uniquement)</span>
+          </span>
+        </li>
+        <li>
+          <a href="tel:+33695341070" class="motion-link flex items-center gap-3 text-white/80 hover:text-white">
+            <Icon name="phone" class="h-5 w-5 shrink-0 text-white/50" />
+            06 95 34 10 70
+          </a>
+        </li>
+        <li>
+          <a
+            href="mailto:thirionexpertise@gmail.com"
+            class="motion-link flex items-center gap-3 break-all text-white/80 hover:text-white"
+          >
+            <Icon name="mail" class="h-5 w-5 shrink-0 text-white/50" />
+            thirionexpertise@gmail.com
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="border-t border-white/10">
+    <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-6 py-4 text-xs text-white/50 sm:flex-row">
+      <p>© {year} THIRION EXPERTISE — Tous droits réservés</p>
+      <a href="/mentions-legales/" class="motion-link hover:text-white">Mentions légales</a>
+    </div>
+  </div>
+</footer>

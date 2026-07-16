@@ -1,0 +1,59 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+
+const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+const nav = [
+  { href: '/', label: 'Accueil' },
+  { href: '/specialite', label: 'Spécialité' },
+  { href: '/domaine', label: 'Domaine' },
+  { href: '/intervenants', label: 'Intervenants' },
+  { href: '/contact', label: 'Contact' },
+];
+---
+<header class="site-header sticky top-0 z-40 border-b border-border/70 bg-white/95 backdrop-blur">
+  <div class="flex items-center justify-between gap-6 px-6 py-4 lg:px-10">
+    <a href="/" class="group motion-link flex items-center gap-3" aria-label="THIRION EXPERTISE - Accueil">
+      <Logo size={36} />
+      <div class="leading-tight">
+        <div class="font-serif text-xl font-semibold tracking-wide text-brand">
+          THIRION EXPERTISE
+        </div>
+        <div class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          Évaluation foncière, immobilière &amp; commerciale
+        </div>
+      </div>
+    </a>
+    <div class="flex items-center gap-4 lg:gap-6">
+      <nav class="hidden items-center gap-1 text-sm md:flex">
+        {nav.map((item) => {
+          const isActive = item.href === '/' ? currentPath === '/' : currentPath === item.href;
+          return (
+            <a
+              href={item.href === '/' ? '/' : `${item.href}/`}
+              class:list={[
+                'motion-link border-b-2 border-transparent px-3 py-2 font-medium text-foreground/80 transition-colors hover:text-brand [&.active]:border-brand [&.active]:text-brand',
+                { active: isActive },
+              ]}
+            >
+              {item.label}
+            </a>
+          );
+        })}
+      </nav>
+      <a
+        href="tel:+33695341070"
+        class="motion-link hidden items-center gap-2 whitespace-nowrap text-sm font-medium text-brand xl:flex"
+      >
+        <Icon name="phone" class="h-4 w-4 shrink-0" />
+        06 95 34 10 70
+      </a>
+      <a
+        href="/contact/"
+        class="motion-button inline-flex items-center whitespace-nowrap rounded-md bg-brand px-4 py-2 text-sm font-medium text-white transition hover:bg-brand/90"
+      >
+        <span class="relative z-10">Prendre rendez-vous</span>
+      </a>
+    </div>
+  </div>
+</header>
