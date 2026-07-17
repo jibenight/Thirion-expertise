@@ -23,6 +23,8 @@ const imageField = (label: string, description?: string) =>
   });
 
 export default config({
+  // Interface d'administration en français (dictionnaire fr-FR intégré à Keystatic).
+  locale: 'fr-FR',
   // En développement : édition des fichiers locaux (src/content).
   // En production : Keystatic Cloud (connexion par e-mail, enregistrement sur GitHub).
   storage: import.meta.env.DEV ? { kind: 'local' } : { kind: 'cloud' },

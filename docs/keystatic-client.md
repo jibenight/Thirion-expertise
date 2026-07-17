@@ -3,7 +3,8 @@
 Le contenu du site (textes, coordonnées, photos, domaines, intervenants…) est
 maintenant **éditable via une interface d'administration**, sans toucher au code.
 
-- L'interface s'appelle **Keystatic**, accessible à l'adresse **`/keystatic`**.
+- L'interface s'appelle **Keystatic**, accessible à l'adresse **`/keystatic`**,
+  **en français** (libellés des champs + interface de l'admin).
 - Les modifications sont enregistrées dans des fichiers de contenu
   (`src/content/*.yaml`) puis publiées via un **build** du site.
 - Le site reste **100 % statique** : rapide, sûr, sans base de données.
@@ -150,3 +151,16 @@ GitHub → Cloudflare reconstruit et publie — **sans aucune intervention techn
   `output: 'static'` → seules les routes `/keystatic` et `/api/keystatic` sont
   rendues à la demande.
 - `wrangler.jsonc` : `nodejs_compat` + `compatibility_date` pour la fonction admin.
+
+### Interface d'administration en français
+
+- `keystatic.config.ts` : option **`locale: 'fr-FR'`** → active le dictionnaire
+  français intégré à Keystatic (Annuler, Ajouter, Supprimer, Modifier, Rechercher,
+  sélecteurs de date…).
+- `scripts/i18n-keystatic.cjs` (exécuté en **`postinstall`**) : francise les
+  quelques libellés codés en dur dans Keystatic et non couverts par la locale
+  (bouton **Enregistrer**, gestion des tableaux et des images, connexion Cloud).
+  Robuste (insensible au hash des bundles), non bloquant et idempotent.
+
+> Limite : l'écran de connexion **hébergé** par Keystatic Cloud reste en anglais
+> (hors de notre code).

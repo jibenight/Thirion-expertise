@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "postinstall": "node scripts/i18n-keystatic.cjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.1.3",
