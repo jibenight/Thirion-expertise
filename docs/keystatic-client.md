@@ -59,9 +59,20 @@ Le contenu de `dist/` est ensuite déployé chez l'hébergeur (comme aujourd'hui
 
 ### Images
 
-Dans les champs image (diaporama, photos des intervenants, carte), le bouton
-**upload** enregistre le fichier dans `public/images/`. Prévoir des images
-déjà optimisées (JPG/PNG, largeur ~1600 px max) pour ne pas alourdir le site.
+Toutes les images ci-dessous sont **modifiables et ajoutables** via le bouton
+**upload** de l'admin (le fichier est enregistré dans `public/images/`) :
+
+| Image | Où la modifier |
+|---|---|
+| Diaporama d'accueil (ajout/suppression/réordre) | **Accueil** |
+| Photos des intervenants (+ nouvel intervenant) | **Intervenants** |
+| Carte d'intervention | **Accueil** |
+| **Logo** (en-tête + pied de page) | **Réglages du site** — vide = logo monogramme par défaut |
+| **Image de partage social** (aperçu WhatsApp / LinkedIn / Facebook) | **Réglages du site** |
+| **Photo de bandeau** (optionnelle) sur Spécialité / Domaine / Contact | page concernée |
+
+> Prévoir des images déjà optimisées (JPG/PNG, largeur ~1600 px max, ~1200 × 630
+> px pour l'image de partage social) pour ne pas alourdir le site.
 
 ---
 

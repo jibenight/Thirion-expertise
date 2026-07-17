@@ -18,7 +18,11 @@ const nav = [
 <header class="site-header sticky top-0 z-40 border-b border-border/70 bg-white/95 backdrop-blur">
   <div class="flex items-center justify-between gap-6 px-6 py-4 lg:px-10">
     <a href="/" class="group motion-link flex items-center gap-3" aria-label="THIRION EXPERTISE - Accueil">
-      <Logo size={36} />
+      {params.logo ? (
+        <img src={params.logo} alt="THIRION EXPERTISE" class="h-9 w-auto shrink-0" />
+      ) : (
+        <Logo size={36} />
+      )}
       <div class="leading-tight">
         <div class="font-serif text-xl font-semibold tracking-wide text-brand">
           THIRION EXPERTISE

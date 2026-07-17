@@ -14,9 +14,10 @@ const iconOptions = [
 
 // Champ image réutilisable : les fichiers sont stockés dans public/images,
 // et la valeur enregistrée est du type « /images/mon-fichier.jpg ».
-const imageField = (label: string) =>
+const imageField = (label: string, description?: string) =>
   fields.image({
     label,
+    description,
     directory: 'public/images',
     publicPath: '/images/',
   });
@@ -51,6 +52,14 @@ export default config({
           label: 'Phrase du pied de page',
           multiline: true,
         }),
+        logo: imageField(
+          'Logo (optionnel)',
+          'Remplace le logo monogramme par défaut dans l’en-tête et le pied de page. Laisser vide pour conserver le logo actuel. Format PNG/SVG à fond transparent recommandé.',
+        ),
+        ogImage: imageField(
+          'Image de partage (réseaux sociaux)',
+          'Aperçu affiché lors du partage du site (WhatsApp, LinkedIn, Facebook…). Format idéal 1200 × 630 px.',
+        ),
       },
     }),
 
@@ -121,6 +130,7 @@ export default config({
         seoDescription: fields.text({ label: 'Description SEO', multiline: true }),
         eyebrow: fields.text({ label: 'Surtitre', defaultValue: 'Spécialité' }),
         titre: fields.text({ label: 'Titre de la page', defaultValue: 'Évaluation et Estimation' }),
+        image: imageField('Photo de la page (optionnelle)', 'Affichée en bandeau sous le titre. Laisser vide pour aucune photo.'),
         items: fields.array(
           fields.object({
             icon: fields.select({ label: 'Icône', options: iconOptions, defaultValue: 'building' }),
@@ -143,6 +153,7 @@ export default config({
         seoDescription: fields.text({ label: 'Description SEO', multiline: true }),
         eyebrow: fields.text({ label: 'Surtitre', defaultValue: 'Domaine' }),
         titre: fields.text({ label: 'Titre de la page', defaultValue: 'Domaine' }),
+        image: imageField('Photo de la page (optionnelle)', 'Affichée en bandeau sous le titre. Laisser vide pour aucune photo.'),
         intro: fields.text({ label: 'Phrase d’introduction', multiline: true }),
         items: fields.array(
           fields.object({
@@ -187,6 +198,7 @@ export default config({
       schema: {
         seoTitle: fields.text({ label: 'Titre SEO' }),
         seoDescription: fields.text({ label: 'Description SEO', multiline: true }),
+        image: imageField('Photo de la page (optionnelle)', 'Affichée en bandeau sous le titre. Laisser vide pour aucune photo.'),
         introTitre: fields.text({ label: 'Titre d’introduction', defaultValue: 'Prendre rendez-vous ou demander un devis' }),
         introTexte: fields.text({ label: 'Texte d’introduction', multiline: true }),
       },

@@ -9,6 +9,11 @@ const domaines = page?.items ?? [];
 ---
 <Layout title={page?.seoTitle} description={page?.seoDescription}>
   <PageShell eyebrow={page?.eyebrow} title={page?.titre}>
+    {page?.image && (
+      <figure class="motion-image mb-10 overflow-hidden rounded-lg shadow-md" data-reveal>
+        <img src={page.image} alt="" loading="lazy" class="max-h-80 w-full object-cover" />
+      </figure>
+    )}
     <p class="max-w-3xl font-serif text-2xl leading-snug text-brand" data-reveal data-delay="1">
       {page?.intro}
     </p>

@@ -20,7 +20,11 @@ const nav = [
     <div>
       <div class="flex items-center gap-3">
         <span class="shrink-0 rounded-sm bg-white p-1">
-          <Logo size={30} />
+          {params.logo ? (
+            <img src={params.logo} alt="THIRION EXPERTISE" class="h-[30px] w-auto" />
+          ) : (
+            <Logo size={30} />
+          )}
         </span>
         <div class="min-w-0 font-serif text-lg font-semibold tracking-wide">THIRION EXPERTISE</div>
       </div>

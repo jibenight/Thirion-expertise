@@ -10,6 +10,11 @@ const items = page?.items ?? [];
 ---
 <Layout title={page?.seoTitle} description={page?.seoDescription}>
   <PageShell eyebrow={page?.eyebrow} title={page?.titre}>
+    {page?.image && (
+      <figure class="motion-image mb-10 overflow-hidden rounded-lg shadow-md" data-reveal>
+        <img src={page.image} alt="" loading="lazy" class="max-h-80 w-full object-cover" />
+      </figure>
+    )}
     <div class="divide-y divide-border">
       {items.map((item, index) => (
         <article class="motion-card grid gap-6 rounded-lg py-10 md:grid-cols-[auto_1fr] md:gap-10" data-reveal data-delay={(index % 3) + 1}>

@@ -10,6 +10,11 @@ const tel = telHref(params.telephone);
 ---
 <Layout title={page?.seoTitle} description={page?.seoDescription}>
   <PageShell eyebrow="Contact" title="Contact">
+    {page?.image && (
+      <figure class="motion-image mb-10 overflow-hidden rounded-lg shadow-md" data-reveal>
+        <img src={page.image} alt="" loading="lazy" class="max-h-80 w-full object-cover" />
+      </figure>
+    )}
     <div class="max-w-2xl" data-reveal data-delay="1">
       <h2 class="font-serif text-2xl font-semibold text-brand">
         {page?.introTitre}
