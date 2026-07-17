@@ -1,0 +1,45 @@
+seoTitle: Accueil — THIRION EXPERTISE
+seoDescription: THIRION EXPERTISE s'engage pour les particuliers, professionnels, entreprises, assurés et permet à chaque client de prendre une décision éclairée et sécurisée.
+heroTitreLead: THIRION EXPERTISE
+heroTitreReste: s'engage pour les particuliers, professionnels, entreprises, assurés et permet à chaque client de prendre une décision éclairée et sécurisée.
+heroCtaPrimaire: Prendre rendez-vous
+heroCtaSecondaire: Nos spécialités
+heroSlides:
+  - image: /images/hero-architecture.jpg
+    alt: Architecture contemporaine — expertise immobilière
+  - image: /images/hero-villa.jpg
+    alt: Villa résidentielle — expertise immobilière et foncière
+  - image: /images/hero-architecture-courbes.jpg
+    alt: Façade contemporaine — expertise du bâti
+  - image: /images/hero-immeuble.jpg
+    alt: Immeuble moderne — expertise commerciale
+cartes:
+  - icon: houseHands
+    titre: Expertise foncière, immobilière et commerciale
+  - icon: houseCrack
+    titre: Expertise préalable et après sinistre
+  - icon: users
+    titre: Expertise conjointe dossiers spéciaux
+pourquoi:
+  - Expérience reconnue
+  - Expertise claire et argumentée
+  - Disponibilité pour nos clients
+engagements:
+  - Analyse objective
+  - Méthodologie structurée
+  - Accompagnement dans les situations sensibles et complexes
+demarche:
+  - titre: Prise de contact
+    texte: Nous échangeons sur votre dossier afin de définir ensemble la mission la plus adaptée à votre situation.
+  - titre: Expertise
+    texte: Analyse objective et méthodologie structurée, en expertise amiable unilatérale ou contradictoire.
+  - titre: Rapport argumenté
+    texte: Un rapport clair et argumenté pour prendre une décision éclairée et sécurisée.
+zones:
+  - titre: Départements du ressort de la Cour d'Appel de Nîmes
+    departements: Ardèche, Gard, Lozère, Vaucluse
+  - titre: Départements limitrophes
+    departements: Aveyron, Bouches-du-Rhône, Drôme, Isère…
+  - titre: Autres départements
+    departements: Alpes de Haute-Provence, Var…
+carte: /images/carte-intervention.png

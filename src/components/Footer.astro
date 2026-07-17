@@ -1,6 +1,10 @@
 ---
 import Icon from './Icon.astro';
 import Logo from './Logo.astro';
+import { getParametres, telHref } from '../lib/content';
+
+const params = await getParametres();
+const tel = telHref(params.telephone);
 const year = new Date().getFullYear();
 const nav = [
   { href: '/', label: 'Accueil' },
@@ -21,18 +25,19 @@ const nav = [
         <div class="min-w-0 font-serif text-lg font-semibold tracking-wide">THIRION EXPERTISE</div>
       </div>
       <p class="mt-5 max-w-xs text-sm leading-relaxed text-white/70">
-        Évaluation et estimation de tous biens et droits immobiliers et commerciaux, à Nîmes et
-        dans le ressort de la Cour d'Appel de Nîmes.
+        {params.footerTagline}
       </p>
-      <a
-        href="https://www.linkedin.com/in/david-thirion-87b02639b"
-        target="_blank"
-        rel="noreferrer noopener"
-        class="mt-6 inline-flex h-10 w-10 items-center justify-center rounded-md bg-white text-brand transition hover:bg-white/85"
-        aria-label="LinkedIn David Thirion"
-      >
-        <Icon name="linkedin" class="h-5 w-5" />
-      </a>
+      {params.linkedin && (
+        <a
+          href={params.linkedin}
+          target="_blank"
+          rel="noreferrer noopener"
+          class="mt-6 inline-flex h-10 w-10 items-center justify-center rounded-md bg-white text-brand transition hover:bg-white/85"
+          aria-label="LinkedIn David Thirion"
+        >
+          <Icon name="linkedin" class="h-5 w-5" />
+        </a>
+      )}
     </div>
 
     <!-- Navigation -->
@@ -54,24 +59,24 @@ const nav = [
         <li class="flex items-start gap-3">
           <Icon name="mapPin" class="mt-0.5 h-5 w-5 shrink-0 text-white/50" />
           <span class="leading-relaxed text-white/80">
-            35 rue des Chassaintes<br />
-            30900 NÎMES<br />
-            <span class="italic text-white/55">(sur rendez-vous uniquement)</span>
+            {params.adresseLigne1}<br />
+            {params.adresseLigne2}<br />
+            <span class="italic text-white/55">{params.adresseNote}</span>
           </span>
         </li>
         <li>
-          <a href="tel:+33695341070" class="motion-link flex items-center gap-3 text-white/80 hover:text-white">
+          <a href={`tel:${tel}`} class="motion-link flex items-center gap-3 text-white/80 hover:text-white">
             <Icon name="phone" class="h-5 w-5 shrink-0 text-white/50" />
-            06 95 34 10 70
+            {params.telephone}
           </a>
         </li>
         <li>
           <a
-            href="mailto:thirionexpertise@gmail.com"
+            href={`mailto:${params.email}`}
             class="motion-link flex items-center gap-3 break-all text-white/80 hover:text-white"
           >
             <Icon name="mail" class="h-5 w-5 shrink-0 text-white/50" />
-            thirionexpertise@gmail.com
+            {params.email}
           </a>
         </li>
       </ul>

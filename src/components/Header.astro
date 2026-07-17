@@ -1,6 +1,10 @@
 ---
 import Logo from './Logo.astro';
 import Icon from './Icon.astro';
+import { getParametres, telHref } from '../lib/content';
+
+const params = await getParametres();
+const tel = telHref(params.telephone);
 
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 const nav = [
@@ -42,11 +46,11 @@ const nav = [
         })}
       </nav>
       <a
-        href="tel:+33695341070"
+        href={`tel:${tel}`}
         class="motion-link hidden items-center gap-2 whitespace-nowrap text-sm font-medium text-brand xl:flex"
       >
         <Icon name="phone" class="h-4 w-4 shrink-0" />
-        06 95 34 10 70
+        {params.telephone}
       </a>
       <a
         href="/contact/"

@@ -1,7 +1,12 @@
 ---
 // Bandeau d'appel à l'action repris avant le pied de page (pattern des sites d'expertise).
-// Réutilise le texte du client (page Contact).
+// Réutilise le texte de la page Contact (source unique) et le téléphone des réglages.
 import Icon from './Icon.astro';
+import { reader, getParametres, telHref } from '../lib/content';
+
+const params = await getParametres();
+const tel = telHref(params.telephone);
+const contact = await reader.singletons.contact.read();
 ---
 <section class="relative border-t border-border bg-brand-soft/60">
   <div
@@ -12,11 +17,10 @@ import Icon from './Icon.astro';
     <div class="grid items-center gap-8 md:grid-cols-[1fr_auto]">
       <div data-reveal>
         <h2 class="font-serif text-3xl text-brand md:text-4xl">
-          Prendre rendez-vous ou demander un devis
+          {contact?.introTitre}
         </h2>
         <p class="mt-3 max-w-2xl leading-relaxed text-foreground/80">
-          Nous vous invitons à nous contacter afin d'échanger sur votre dossier et définir
-          ensemble la mission la plus adaptée à votre situation.
+          {contact?.introTexte}
         </p>
       </div>
       <div class="flex flex-wrap items-center gap-3" data-reveal data-delay="1">
@@ -27,11 +31,11 @@ import Icon from './Icon.astro';
           <span class="relative z-10">Nous contacter</span>
         </a>
         <a
-          href="tel:+33695341070"
+          href={`tel:${tel}`}
           class="motion-link inline-flex items-center gap-2 rounded-md border border-brand/30 bg-white px-5 py-3 text-sm font-medium text-brand transition hover:bg-brand-soft"
         >
           <Icon name="phone" class="h-4 w-4" />
-          06 95 34 10 70
+          {params.telephone}
         </a>
       </div>
     </div>

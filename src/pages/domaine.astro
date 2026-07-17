@@ -2,44 +2,21 @@
 import Layout from '../layouts/Layout.astro';
 import PageShell from '../components/PageShell.astro';
 import CtaBand from '../components/CtaBand.astro';
+import { reader } from '../lib/content';
 
-const domaines = [
-  {
-    title: 'Information financière',
-    body: "Évaluation patrimoniale destinée à éclairer une décision économique, stratégique ou de gestion, dans un contexte privé ou professionnel.",
-  },
-  {
-    title: 'Vente, location, prêt bancaire',
-    body: "Détermination de la valeur d'un bien afin de sécuriser une transaction immobilière, une mise en location ou la constitution d'un dossier de financement.",
-  },
-  {
-    title: 'Donation, partage, divorce, succession',
-    body: "Évaluation objective des biens immobiliers permettant d'établir une répartition équitable dans le cadre d'opérations familiales ou patrimoniales.",
-  },
-  {
-    title: 'Déclaration fiscale, redressement',
-    body: "Estimation argumentée de la valeur des biens pour répondre aux obligations déclaratives ou accompagner la défense des intérêts du contribuable.",
-  },
-  {
-    title: 'Assurance préalable et après sinistre',
-    body: "Analyse de la valeur du bien avant sinistre ou évaluation des conséquences financières après sinistre afin d'accompagner l'assuré dans ses démarches.",
-  },
-  {
-    title: 'Valeur locative commerciale',
-    body: "Détermination de la valeur locative d'un local commercial ou professionnel dans le cadre d'un renouvellement de bail, d'une révision de loyer, d'une cession de fonds de commerce ou d'un contentieux locatif.",
-  },
-];
+const page = await reader.singletons.domaine.read();
+const domaines = page?.items ?? [];
 ---
-<Layout title="Domaine — THIRION EXPERTISE" description="Domaines d'intervention en expertise amiable unilatérale ou contradictoire : information financière, vente, donation, fiscal, assurance, valeur locative.">
-  <PageShell eyebrow="Domaine" title="Domaine">
+<Layout title={page?.seoTitle} description={page?.seoDescription}>
+  <PageShell eyebrow={page?.eyebrow} title={page?.titre}>
     <p class="max-w-3xl font-serif text-2xl leading-snug text-brand" data-reveal data-delay="1">
-      Nos domaines d'intervention en expertise amiable unilatérale ou contradictoire :
+      {page?.intro}
     </p>
     <div class="mt-12 grid gap-8 md:grid-cols-2">
       {domaines.map((d, index) => (
         <article class="motion-card rounded-r-lg border-l-2 border-brand/70 py-4 pl-6" data-reveal data-delay={(index % 3) + 1}>
-          <h2 class="font-serif text-2xl font-semibold text-brand">{d.title}</h2>
-          <p class="mt-2 leading-relaxed text-foreground/80">{d.body}</p>
+          <h2 class="font-serif text-2xl font-semibold text-brand">{d.titre}</h2>
+          <p class="mt-2 leading-relaxed text-foreground/80">{d.corps}</p>
         </article>
       ))}
     </div>

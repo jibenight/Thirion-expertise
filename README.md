@@ -9,7 +9,19 @@ Site en production : <https://thirion-expertise.fr>
 - **[Astro](https://astro.build/) 7** — génération de site statique
 - **[Tailwind CSS](https://tailwindcss.com/) 4** — via le plugin `@tailwindcss/vite`
 - **[tw-animate-css](https://www.npmjs.com/package/tw-animate-css)** — utilitaires d'animation
+- **[Keystatic](https://keystatic.com/)** — interface d'édition du contenu (voir ci-dessous)
 - Composants `.astro`, aucune dépendance front-end lourde ; sortie 100 % statique.
+
+## Gestion du contenu (Keystatic)
+
+Le contenu des pages (textes, coordonnées, photos, domaines, intervenants…) est
+éditable via une interface d'administration, **sans toucher au code**, à
+l'adresse `/keystatic` (en `npm run dev`). Le contenu est stocké dans
+`src/content/*.yaml` et lu au build via l'API Reader de Keystatic — le site
+reste 100 % statique.
+
+📖 **Guide complet (édition + passage à l'édition en ligne autonome) :
+[`docs/keystatic-client.md`](docs/keystatic-client.md)**
 
 ## Prérequis
 
@@ -36,10 +48,14 @@ npm run preview
 
 ```
 thirion-expertise/
-├── astro.config.mjs        # config Astro (site + plugin Tailwind)
+├── astro.config.mjs        # config Astro (Tailwind + admin Keystatic en dev)
+├── keystatic.config.ts     # rubriques & champs éditables (source unique)
 ├── public/
 │   └── images/             # photos, cartes d'intervention, favicons
 ├── src/
+│   ├── content/            # contenu éditable (YAML, géré par Keystatic)
+│   ├── lib/
+│   │   └── content.ts       # lecture du contenu au build (API Reader Keystatic)
 │   ├── layouts/
 │   │   └── Layout.astro     # ossature commune (<head>, header, footer, slot "prefooter")
 │   ├── components/

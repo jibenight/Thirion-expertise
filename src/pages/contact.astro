@@ -2,22 +2,27 @@
 import Layout from '../layouts/Layout.astro';
 import PageShell from '../components/PageShell.astro';
 import Icon from '../components/Icon.astro';
+import { reader, getParametres, telHref } from '../lib/content';
+
+const page = await reader.singletons.contact.read();
+const params = await getParametres();
+const tel = telHref(params.telephone);
 ---
-<Layout title="Contact — THIRION EXPERTISE" description="Prenez rendez-vous ou demandez un devis. Cabinet THIRION EXPERTISE — 35 rue des Chassaintes, 30900 Nîmes.">
+<Layout title={page?.seoTitle} description={page?.seoDescription}>
   <PageShell eyebrow="Contact" title="Contact">
     <div class="max-w-2xl" data-reveal data-delay="1">
       <h2 class="font-serif text-2xl font-semibold text-brand">
-        Prendre rendez-vous ou demander un devis
+        {page?.introTitre}
       </h2>
       <p class="mt-4 text-foreground/80">
-        Nous vous invitons à nous contacter afin d'échanger sur votre dossier et définir ensemble
-        la mission la plus adaptée à votre situation.
+        {page?.introTexte}
       </p>
     </div>
 
     <div class="mt-12 grid gap-10 lg:grid-cols-[1.2fr_1fr]">
       <form
         id="contact-form"
+        data-email={params.email}
         class="motion-card rounded-lg border border-brand/15 bg-brand-soft/40 p-6 md:p-8"
         data-reveal
       >
@@ -70,44 +75,47 @@ import Icon from '../components/Icon.astro';
           <li class="flex gap-3">
             <Icon name="mapPin" class="mt-0.5 h-5 w-5 shrink-0 text-brand" />
             <div>
-              35 rue des Chassaintes<br />
-              30900 NÎMES
-              <div class="mt-1 italic text-brand/80">(sur rendez-vous uniquement)</div>
+              {params.adresseLigne1}<br />
+              {params.adresseLigne2}
+              <div class="mt-1 italic text-brand/80">{params.adresseNote}</div>
             </div>
           </li>
           <li>
-            <a href="tel:+33695341070" class="flex items-center gap-3 hover:text-brand">
+            <a href={`tel:${tel}`} class="flex items-center gap-3 hover:text-brand">
               <Icon name="phone" class="h-5 w-5 text-brand" />
-              <span class="font-semibold">Téléphone : 06 95 34 10 70</span>
+              <span class="font-semibold">Téléphone : {params.telephone}</span>
             </a>
           </li>
           <li>
-            <a href="mailto:thirionexpertise@gmail.com" class="flex items-center gap-3 break-all hover:text-brand">
+            <a href={`mailto:${params.email}`} class="flex items-center gap-3 break-all hover:text-brand">
               <Icon name="mail" class="h-5 w-5 shrink-0 text-brand" />
-              mail : thirionexpertise@gmail.com
+              mail : {params.email}
             </a>
           </li>
         </ul>
-        <div class="mt-6 border-t border-border pt-6">
-          <p class="text-sm font-semibold text-brand">Retrouvez-nous sur LinkedIn</p>
-          <a
-            href="https://www.linkedin.com/in/david-thirion-87b02639b"
-            target="_blank"
-            rel="noreferrer noopener"
-            class="mt-3 inline-flex h-10 w-10 items-center justify-center rounded-md bg-brand text-white transition hover:bg-brand/90"
-            aria-label="LinkedIn"
-          >
-            <Icon name="linkedin" class="h-5 w-5" />
-          </a>
-        </div>
+        {params.linkedin && (
+          <div class="mt-6 border-t border-border pt-6">
+            <p class="text-sm font-semibold text-brand">Retrouvez-nous sur LinkedIn</p>
+            <a
+              href={params.linkedin}
+              target="_blank"
+              rel="noreferrer noopener"
+              class="mt-3 inline-flex h-10 w-10 items-center justify-center rounded-md bg-brand text-white transition hover:bg-brand/90"
+              aria-label="LinkedIn"
+            >
+              <Icon name="linkedin" class="h-5 w-5" />
+            </a>
+          </div>
+        )}
       </aside>
     </div>
   </PageShell>
 </Layout>
 
 <script>
-  const form = document.querySelector('#contact-form');
+  const form = document.querySelector('#contact-form') as HTMLFormElement | null;
   const message = document.querySelector('#sent-message');
+  const email = form?.dataset.email ?? '';
 
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -116,7 +124,7 @@ import Icon from '../components/Icon.astro';
       subject: `[Contact site] ${data.get('subject') ?? ''}`,
       body: `Nom : ${data.get('name') ?? ''}\nTéléphone : ${data.get('phone') ?? ''}\nEmail : ${data.get('email') ?? ''}\n\n${data.get('message') ?? ''}`,
     });
-    window.location.href = `mailto:thirionexpertise@gmail.com?${params.toString()}`;
+    window.location.href = `mailto:${email}?${params.toString()}`;
     message?.classList.remove('hidden');
   });
 </script>
