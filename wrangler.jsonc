@@ -1,0 +1,7 @@
+{
+  // Configuration Cloudflare pour la fonction d'administration Keystatic (/keystatic).
+  // nodejs_compat : fournit les modules Node (node:*) au runtime workerd.
+  "name": "thirion-expertise",
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": ["nodejs_compat"]
+}

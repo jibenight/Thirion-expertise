@@ -83,91 +83,70 @@ Toutes les images ci-dessous sont **modifiables et ajoutables** via le bouton
 Cloud enregistre la modification sur le dépôt → l'hébergeur reconstruit et publie
 automatiquement (~1–2 min).
 
-Il y a trois briques à mettre en place **une seule fois**.
+Hébergement retenu : **Cloudflare Workers** (build Git automatique via *Workers
+Builds*). La configuration du code est **déjà en place** (voir plus bas) ; il
+reste les étapes côté comptes GitHub / Cloudflare / Keystatic Cloud.
 
-### Étape 1 — Le code sur GitHub
+### Ce qui est déjà configuré dans le projet
 
-Keystatic Cloud enregistre les modifications sur un dépôt **GitHub**. Pousser ce
-projet sur un dépôt GitHub (privé de préférence) :
+- `keystatic.config.ts` — stockage **local en `dev`**, **Keystatic Cloud en
+  production** (`storage: import.meta.env.DEV ? local : cloud`), projet
+  `thirion-david/thirion-expertise`.
+- `astro.config.mjs` — adaptateur `@astrojs/cloudflare` avec
+  `prerenderEnvironment: 'node'` (les pages statiques sont pré-rendues en Node,
+  seule `/keystatic` tourne comme fonction), admin activé.
+- `wrangler.jsonc` — `nodejs_compat` + `compatibility_date` (requis par
+  l'admin sur le runtime Cloudflare).
+
+### Étape 1 — Pousser le code sur GitHub
 
 ```bash
-git remote add origin git@github.com:<organisation>/thirion-expertise.git
-git push -u origin main
+git push origin main   # dépôt : jibenight/Thirion-expertise
 ```
 
-### Étape 2 — Le projet Keystatic Cloud
+### Étape 2 — Créer le projet Keystatic Cloud ✅ (fait)
 
-1. Aller sur **https://keystatic.cloud** et se connecter.
-2. Créer une **équipe** (team), puis un **projet** relié au dépôt GitHub ci-dessus.
-3. Noter l'identifiant du projet, au format **`equipe/projet`** (fourni sur la
-   page de réglages du projet).
+Projet créé et relié au dépôt : `thirion-david/thirion-expertise`.
+Dans les réglages du projet sur **keystatic.cloud**, renseigner l'**URL de
+production** du site (`https://thirion-expertise.fr`) pour autoriser la connexion
+du client depuis cette adresse.
 
-### Étape 3 — Adapter la configuration du site
+### Étape 3 — Déployer sur Cloudflare Workers
 
-Dans **`keystatic.config.ts`**, remplacer le stockage local par le Cloud :
+> ⚠️ L'adaptateur Astro pour Cloudflare déploie sur **Workers**, **plus sur
+> Cloudflare Pages**. Utiliser *Workers Builds* (intégration Git).
 
-```ts
-export default config({
-  storage: { kind: 'cloud' },
-  cloud: { project: 'equipe/thirion-expertise' }, // ← identifiant de l'étape 2
-  // …le reste (singletons) ne change pas
-});
-```
+1. Cloudflare → **Workers & Pages** → **Create** → **Import a repository** →
+   sélectionner `jibenight/Thirion-expertise`.
+2. **Build command** : `npm run build`.
+3. `nodejs_compat` et la `compatibility_date` sont déjà dans `wrangler.jsonc` —
+   Cloudflare les applique automatiquement.
+4. Le namespace **KV `SESSION`** (utilisé par l'admin) est **auto-provisionné**
+   par Wrangler au déploiement — rien à créer à la main.
+5. Ajouter le **domaine personnalisé** `thirion-expertise.fr` au Worker.
 
-Dans **`astro.config.mjs`**, activer l'admin dans le build de production et
-ajouter l'**adaptateur de l'hébergeur** (une seule ligne à adapter) :
-
-```js
-import { defineConfig } from 'astro/config';
-import tailwindcss from '@tailwindcss/vite';
-import react from '@astrojs/react';
-import keystatic from '@keystatic/astro';
-import netlify from '@astrojs/netlify'; // ← ou @astrojs/vercel / @astrojs/cloudflare
-
-export default defineConfig({
-  site: 'https://thirion-expertise.fr',
-  output: 'static',          // les pages publiques restent pré-rendues (statiques)
-  adapter: netlify(),        // seul /keystatic est rendu à la demande
-  integrations: [react(), keystatic()],
-  vite: { plugins: [tailwindcss()] },
-});
-```
-
-Installer l'adaptateur correspondant :
-
-| Hébergeur | Commande | Import |
-|---|---|---|
-| **Netlify** | `npm i @astrojs/netlify` | `import netlify from '@astrojs/netlify'` → `adapter: netlify()` |
-| **Vercel** | `npm i @astrojs/vercel` | `import vercel from '@astrojs/vercel'` → `adapter: vercel()` |
-| **Cloudflare** | `npm i @astrojs/cloudflare` | `import cloudflare from '@astrojs/cloudflare'` → `adapter: cloudflare()` |
-
-> Avec `output: 'static'` + adaptateur, **seule** la route `/keystatic` est rendue
-> à la demande ; toutes les pages publiques restent générées en statique (rapides,
-> servies par le CDN).
-
-### Étape 4 — Connecter l'hébergeur au dépôt
-
-Sur Netlify / Vercel / Cloudflare Pages : « New project » → sélectionner le dépôt
-GitHub → commande de build `npm run build`. L'hébergeur reconstruit et publie
-automatiquement **à chaque modification** enregistrée depuis `/keystatic`.
+À chaque `git push` (ou modification enregistrée depuis `/keystatic`), Cloudflare
+reconstruit et publie automatiquement.
 
 ### Résultat
 
 Le client va sur `https://thirion-expertise.fr/keystatic`, se connecte avec son
-e-mail, modifie le contenu, clique **Save** — et le site public se met à jour
-tout seul, sans aucune intervention technique.
+**e-mail**, modifie le contenu, clique **Save** → Keystatic Cloud enregistre sur
+GitHub → Cloudflare reconstruit et publie — **sans aucune intervention technique**.
 
-> **En attendant cette bascule**, le site fonctionne exactement comme avant :
-> `npm run build` produit un site **100 % statique**, l'admin Keystatic n'étant
-> monté qu'en développement (`npm run dev`).
+> Note : si l'admin rencontrait une limite du runtime edge de Cloudflare, le
+> repli est immédiat — remplacer l'adaptateur par `@astrojs/netlify` (runtime
+> Node, sans `wrangler.jsonc` ni KV) sans rien changer d'autre.
 
 ---
 
 ## Fonctionnement technique (pour mémoire)
 
 - `keystatic.config.ts` : définit toutes les rubriques et champs éditables
-  (source unique de vérité).
+  (source unique de vérité) ; stockage local en `dev`, Cloud en production.
 - `src/lib/content.ts` : lit le contenu au build via l'**API Reader** de
-  Keystatic ; aucune intégration serveur nécessaire pour le site public.
-- `astro.config.mjs` : l'admin (`react()` + `keystatic()`) n'est activé qu'en
-  `dev` (`enableAdmin`), afin que le build reste statique.
+  Keystatic (pages publiques pré-rendues en statique).
+- `astro.config.mjs` : adaptateur Cloudflare + admin (`react()` + `keystatic()`) ;
+  `output: 'static'` → seules les routes `/keystatic` et `/api/keystatic` sont
+  rendues à la demande.
+- `wrangler.jsonc` : `nodejs_compat` + `compatibility_date` pour la fonction admin.

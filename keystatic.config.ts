@@ -23,7 +23,10 @@ const imageField = (label: string, description?: string) =>
   });
 
 export default config({
-  storage: { kind: 'local' },
+  // En développement : édition des fichiers locaux (src/content).
+  // En production : Keystatic Cloud (connexion par e-mail, enregistrement sur GitHub).
+  storage: import.meta.env.DEV ? { kind: 'local' } : { kind: 'cloud' },
+  cloud: { project: 'thirion-david/thirion-expertise' },
   ui: {
     brand: { name: 'THIRION EXPERTISE' },
     navigation: {
