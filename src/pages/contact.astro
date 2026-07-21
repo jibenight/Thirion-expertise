@@ -27,13 +27,18 @@ const tel = telHref(params.telephone);
     <div class="mt-12 grid gap-10 lg:grid-cols-[1.2fr_1fr]">
       <form
         id="contact-form"
-        data-email={params.email}
+        method="post"
+        action="/api/contact"
         class="motion-card rounded-lg border border-brand/15 bg-brand-soft/40 p-6 md:p-8"
         data-reveal
       >
         <h3 class="font-serif text-xl font-semibold text-brand">Formulaire de contact</h3>
         <div class="mt-6 h-px w-16 bg-brand/40"></div>
         <div class="mt-6 space-y-5">
+          <div class="hidden" aria-hidden="true">
+            <label for="company">Ne pas remplir</label>
+            <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
+          </div>
           <div>
             <label class="mb-2 block text-sm font-medium text-brand" for="name">Nom prénom</label>
             <input id="name" name="name" required class="w-full rounded-md border border-brand/20 bg-white px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" />
@@ -62,13 +67,14 @@ const tel = telHref(params.telephone);
           </div>
           <button
             type="submit"
-            class="motion-button mt-2 inline-flex items-center justify-center rounded-md bg-brand px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-brand/90"
+            class="motion-button mt-2 inline-flex items-center justify-center rounded-md bg-brand px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span class="relative z-10">Envoyer ma demande</span>
           </button>
-          <p id="sent-message" class="hidden text-sm text-brand/80">
-            Votre client de messagerie vient de s'ouvrir avec votre demande pré-remplie.
+          <p id="form-success" class="hidden rounded-md bg-brand/10 px-4 py-3 text-sm text-brand" role="status">
+            Merci, votre demande a bien été envoyée. Nous vous répondrons dans les meilleurs délais.
           </p>
+          <p id="form-error" class="hidden rounded-md bg-red-50 px-4 py-3 text-sm text-red-700" role="alert"></p>
         </div>
       </form>
 
@@ -119,17 +125,45 @@ const tel = telHref(params.telephone);
 
 <script>
   const form = document.querySelector('#contact-form') as HTMLFormElement | null;
-  const message = document.querySelector('#sent-message');
-  const email = form?.dataset.email ?? '';
+  const success = document.querySelector('#form-success');
+  const error = document.querySelector('#form-error');
+  const button = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+  const buttonLabel = button?.querySelector('span');
+  const defaultLabel = buttonLabel?.textContent ?? 'Envoyer ma demande';
 
-  form?.addEventListener('submit', (event) => {
+  form?.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const data = new FormData(form);
-    const params = new URLSearchParams({
-      subject: `[Contact site] ${data.get('subject') ?? ''}`,
-      body: `Nom : ${data.get('name') ?? ''}\nTéléphone : ${data.get('phone') ?? ''}\nEmail : ${data.get('email') ?? ''}\n\n${data.get('message') ?? ''}`,
-    });
-    window.location.href = `mailto:${email}?${params.toString()}`;
-    message?.classList.remove('hidden');
+    success?.classList.add('hidden');
+    error?.classList.add('hidden');
+
+    if (button) button.disabled = true;
+    if (buttonLabel) buttonLabel.textContent = 'Envoi en cours…';
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+      });
+      const result = await response.json().catch(() => ({ ok: false }));
+
+      if (response.ok && result.ok) {
+        form.reset();
+        success?.classList.remove('hidden');
+      } else {
+        if (error) {
+          error.textContent = result.error ?? "L'envoi a échoué, réessayez plus tard.";
+          error.classList.remove('hidden');
+        }
+      }
+    } catch {
+      if (error) {
+        error.textContent = "L'envoi a échoué, vérifiez votre connexion et réessayez.";
+        error.classList.remove('hidden');
+      }
+    } finally {
+      if (button) button.disabled = false;
+      if (buttonLabel) buttonLabel.textContent = defaultLabel;
+    }
   });
 </script>

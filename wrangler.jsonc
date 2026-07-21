@@ -3,5 +3,13 @@
   // nodejs_compat : fournit les modules Node (node:*) au runtime workerd.
   "name": "thirion-expertise",
   "compatibility_date": "2026-07-01",
-  "compatibility_flags": ["nodejs_compat"]
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Formulaire de contact (endpoint /api/contact, envoi via Resend).
+  // Variables non secrètes ci-dessous ; la clé API se pose en secret :
+  //     npx wrangler secret put RESEND_API_KEY
+  "vars": {
+    "CONTACT_TO": "thirionexpertise@gmail.com",
+    "CONTACT_FROM": "Thirion Expertise <contact@thirion-expertise.fr>"
+  }
 }
