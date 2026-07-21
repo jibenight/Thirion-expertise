@@ -20,6 +20,8 @@ Procédure détaillée : [`keystatic-client.md`](keystatic-client.md) §3.
   seulement), `wrangler.jsonc` avec `nodejs_compat`.
 - Admin **en français** (`locale: 'fr-FR'` + `scripts/i18n-keystatic.cjs`).
 - Édition locale : `npm run dev` → http://localhost:4321/keystatic
+- **Formulaire de contact** connecté : endpoint serveur `/api/contact` (Worker)
+  qui envoie la demande par email via **Resend** (fini le `mailto:`).
 
 ## ⬜ Reste à faire (toi)
 
@@ -35,6 +37,16 @@ Procédure détaillée : [`keystatic-client.md`](keystatic-client.md) §3.
    - Le KV `SESSION` est auto-provisionné.
 
 3. Ajouter le **domaine** `thirion-expertise.fr` au Worker.
+
+4. **Formulaire de contact (Resend)** :
+   - Créer un compte sur **resend.com** (gratuit, 3 000 mails/mois).
+   - **Vérifier le domaine** `thirion-expertise.fr` → coller les enregistrements
+     DNS fournis (SPF/DKIM) dans le DNS Cloudflare. Sans ça, l'envoi depuis
+     `contact@thirion-expertise.fr` est refusé.
+   - Créer une **clé API** puis la poser en secret :
+     `npx wrangler secret put RESEND_API_KEY`.
+   - `CONTACT_TO` / `CONTACT_FROM` sont déjà dans `wrangler.jsonc`.
+   - Dev local : copier `.env.example` en `.env` et y mettre la clé.
 
 ## ⬜ À vérifier après mise en ligne
 
