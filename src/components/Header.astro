@@ -16,15 +16,15 @@ const nav = [
 ];
 ---
 <header class="site-header sticky top-0 z-40 border-b border-border/70 bg-white/95 backdrop-blur">
-  <div class="flex items-center justify-between gap-6 px-6 py-4 lg:px-10">
-    <a href="/" class="group motion-link flex items-center gap-3" aria-label="THIRION EXPERTISE - Accueil">
+  <div class="flex items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-10">
+    <a href="/" class="group motion-link flex min-w-0 items-center gap-3" aria-label="THIRION EXPERTISE - Accueil">
       {params.logo ? (
         <img src={params.logo} alt="THIRION EXPERTISE" class="h-9 w-auto shrink-0" />
       ) : (
         <Logo size={36} />
       )}
-      <div class="leading-tight">
-        <div class="font-serif text-xl font-semibold tracking-wide text-brand">
+      <div class="min-w-0 leading-tight">
+        <div class="font-serif text-lg font-semibold tracking-wide text-brand sm:text-xl">
           THIRION EXPERTISE
         </div>
         <div class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -58,10 +58,79 @@ const nav = [
       </a>
       <a
         href="/contact/"
-        class="motion-button inline-flex items-center whitespace-nowrap rounded-md bg-brand px-4 py-2 text-sm font-medium text-white transition hover:bg-brand/90"
+        class="motion-button hidden items-center whitespace-nowrap rounded-md bg-brand px-4 py-2 text-sm font-medium text-white transition hover:bg-brand/90 md:inline-flex"
+      >
+        <span class="relative z-10">Prendre rendez-vous</span>
+      </a>
+      <button
+        type="button"
+        id="menu-toggle"
+        class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-brand/20 text-brand transition hover:bg-brand-soft/60 md:hidden"
+        aria-controls="mobile-menu"
+        aria-expanded="false"
+        aria-label="Ouvrir le menu"
+      >
+        <Icon name="menu" class="menu-open h-6 w-6" />
+        <Icon name="close" class="menu-close hidden h-6 w-6" />
+      </button>
+    </div>
+  </div>
+
+  <nav id="mobile-menu" class="hidden border-t border-border/70 bg-white px-4 py-4 sm:px-6 md:hidden" aria-label="Navigation principale">
+    <ul class="space-y-1">
+      {nav.map((item) => {
+        const isActive = item.href === '/' ? currentPath === '/' : currentPath === item.href;
+        return (
+          <li>
+            <a
+              href={item.href === '/' ? '/' : `${item.href}/`}
+              class:list={[
+                'block rounded-md px-3 py-2.5 text-base font-medium text-foreground/80 transition-colors hover:bg-brand-soft/60 hover:text-brand [&.active]:bg-brand-soft/60 [&.active]:text-brand',
+                { active: isActive },
+              ]}
+            >
+              {item.label}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+    <div class="mt-4 space-y-3 border-t border-border/70 pt-4">
+      <a href={`tel:${tel}`} class="flex items-center gap-2 px-3 text-sm font-medium text-brand">
+        <Icon name="phone" class="h-4 w-4 shrink-0" />
+        {params.telephone}
+      </a>
+      <a
+        href="/contact/"
+        class="motion-button flex items-center justify-center rounded-md bg-brand px-4 py-3 text-sm font-medium text-white transition hover:bg-brand/90"
       >
         <span class="relative z-10">Prendre rendez-vous</span>
       </a>
     </div>
-  </div>
+  </nav>
 </header>
+
+<script>
+  const toggle = document.querySelector('#menu-toggle');
+  const menu = document.querySelector('#mobile-menu');
+  const iconOpen = toggle?.querySelector('.menu-open');
+  const iconClose = toggle?.querySelector('.menu-close');
+
+  const setOpen = (open: boolean) => {
+    menu?.classList.toggle('hidden', !open);
+    iconOpen?.classList.toggle('hidden', open);
+    iconClose?.classList.toggle('hidden', !open);
+    toggle?.setAttribute('aria-expanded', String(open));
+    toggle?.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
+  };
+
+  toggle?.addEventListener('click', () => {
+    setOpen(menu?.classList.contains('hidden') ?? false);
+  });
+
+  // Ferme le menu au clic sur un lien ou avec la touche Échap.
+  menu?.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setOpen(false)));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') setOpen(false);
+  });
+</script>
