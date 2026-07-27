@@ -134,7 +134,7 @@ export default config({
         seoTitle: fields.text({ label: 'Titre SEO' }),
         seoDescription: fields.text({ label: 'Description SEO', multiline: true }),
         eyebrow: fields.text({ label: 'Surtitre', defaultValue: 'Spécialité' }),
-        titre: fields.text({ label: 'Titre de la page', defaultValue: 'Évaluation et Estimation' }),
+        titre: fields.text({ label: 'Titre de la page', defaultValue: 'Spécialité' }),
         image: imageField('Photo de la page (optionnelle)', 'Affichée en bandeau sous le titre. Laisser vide pour aucune photo.'),
         items: fields.array(
           fields.object({

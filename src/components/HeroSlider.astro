@@ -10,7 +10,7 @@ const { slides = [], interval = 6000 } = Astro.props;
   data-hero-slider
   data-interval={interval}
   aria-roledescription="carrousel"
-  aria-label="Photographies — expertise foncière, immobilière et commerciale"
+  aria-label="Photographies du territoire d'intervention"
 >
   <div class="relative aspect-[16/10] bg-brand-soft">
     {slides.map((slide, i) => (
@@ -21,11 +21,13 @@ const { slides = [], interval = 6000 } = Astro.props;
         aria-hidden={i === 0 ? 'false' : 'true'}
       >
         <img
-          src={slide.src}
+          src={i === 0 ? slide.src : undefined}
+          data-src={slide.src}
           alt={slide.alt}
           width="1600"
           height="1000"
           loading={i === 0 ? 'eager' : 'lazy'}
+          decoding="async"
           class="h-full w-full object-cover"
         />
       </figure>
@@ -145,8 +147,17 @@ const { slides = [], interval = 6000 } = Astro.props;
     let idx = Math.max(0, slides.findIndex((s) => s.dataset.active === 'true'));
     let timer: ReturnType<typeof setInterval> | null = null;
 
+    // Les visuels sont chargés à la demande (image courante + suivante) :
+    // avec une dizaine de photos, tout charger d'emblée pénaliserait l'accueil.
+    function load(n: number) {
+      const img = slides[(n + slides.length) % slides.length]?.querySelector('img');
+      if (img && !img.getAttribute('src') && img.dataset.src) img.src = img.dataset.src;
+    }
+
     function show(n: number) {
       idx = (n + slides.length) % slides.length;
+      load(idx);
+      load(idx + 1);
       slides.forEach((s, i) => {
         const active = i === idx;
         s.dataset.active = active ? 'true' : 'false';
