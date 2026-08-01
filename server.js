@@ -21,7 +21,7 @@ console.log(
 
 // `import()` dynamique plutôt qu'un `import` statique : le fichier reste valide
 // que Node le charge comme ESM ou comme CommonJS.
-import('./node-server/entry.mjs').catch((err) => {
+import('./dist/server/entry.mjs').catch((err) => {
   console.error("[thirion-expertise] Le serveur n'a pas pu démarrer :", err);
   process.exit(1);
 });

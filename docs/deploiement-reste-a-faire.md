@@ -17,28 +17,20 @@ demande : `/keystatic`, `/api/contact` et `/robots.txt`.
 L'adaptateur `@astrojs/node` en mode `standalone` produit un serveur autonome qui
 sert aussi les fichiers statiques.
 
-**Disposition du build, dictée par hPanel** (`build.client` / `build.server` dans
-`astro.config.mjs`, résolus depuis `outDir`) :
-
-| Dossier | Contenu |
-|---|---|
-| `dist/` | les pages publiques, **`index.html` à la racine** |
-| `node-server/` | le serveur Node, **en dehors** de la racine web |
-| `server.js` | le lanceur versionné, à la racine du dépôt |
-
-Trois raisons à cette disposition plutôt qu'au `dist/client` + `dist/server` par
-défaut :
-
-1. hPanel monte le répertoire de sortie comme racine web. Sans `index.html` à la
-   racine de `dist/`, la page d'accueil répond **403**.
-2. Avec la disposition par défaut, le bundle serveur devenait **téléchargeable**
-   (`/server/start.js` répondait 200 en production).
-3. Le site reste consultable **même si l'hébergeur ne démarre pas Node** ; seuls
-   le formulaire et l'admin manqueraient alors à l'appel.
+**Disposition du build** : `dist/client` (pages publiques) + `dist/server`
+(serveur Node), la disposition par défaut de l'adaptateur. Hostinger ne recopie
+dans le répertoire d'exécution que le **répertoire de sortie** et les fichiers
+**versionnés** — un bundle écrit ailleurs (essai avec `node-server/`) est absent
+au démarrage : `ERR_MODULE_NOT_FOUND`.
 
 > hPanel valide le champ « Fichier d'entrée » sur l'extension `.js` et refuse
-> `.mjs`. D'où `server.js`, qui fait un `import()` dynamique de
-> `node-server/entry.mjs` — valide que Node le charge en ESM ou en CommonJS.
+> `.mjs`. D'où `server.js`, versionné à la racine du dépôt, qui fait un
+> `import()` dynamique de `dist/server/entry.mjs`.
+
+> ⚠️ **Le préréglage de framework doit être `Express`, pas `Astro`.** Le
+> préréglage Astro traite le projet comme un site statique : il publie le
+> répertoire de sortie sans jamais démarrer Node, et refuse même qu'on renseigne
+> un fichier d'entrée. Avec `Express`, la plateforme lance bien le process.
 
 > **Historique** : le site a d'abord été déployé sur Cloudflare Workers
 > (`thirion-expertise.jean-nguyen.workers.dev`). Cet hébergement est abandonné —
@@ -68,7 +60,7 @@ défaut :
 
    | Champ | Valeur |
    |---|---|
-   | Préréglage de framework | Astro |
+   | Préréglage de framework | **`Express`** (surtout pas `Astro`) |
    | Branche | `main` |
    | Version de Node | `22.x` |
    | Répertoire root | `./` |

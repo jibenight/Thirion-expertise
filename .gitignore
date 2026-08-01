@@ -1,6 +1,5 @@
 # build output
 dist/
-node-server/
 .astro/
 
 # dependencies
