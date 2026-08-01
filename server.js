@@ -3,6 +3,11 @@
 // hPanel valide le champ « Fichier d'entrée » sur l'extension `.js` et propose
 // en exemple un fichier du dépôt (`src/server.js`). Ce lanceur, versionné et
 // donc toujours présent, démarre le serveur produit par `npm run build`.
+//
+// ⚠️ AUCUN `await` de premier niveau ici. Le runtime est LiteSpeed `lsnode.js`,
+// qui charge ce fichier avec `require()` ; `require()` refuse un module ESM
+// contenant un await de premier niveau (ERR_REQUIRE_ASYNC_MODULE). Tout
+// l'asynchrone est donc enfermé dans `main()`.
 import { spawn } from 'node:child_process';
 import { existsSync, readdirSync } from 'node:fs';
 import { createServer } from 'node:http';
@@ -30,13 +35,6 @@ const here = dirname(fileURLToPath(import.meta.url));
 const CANDIDATES = ['dist/server/entry.mjs', 'server/entry.mjs', 'entry.mjs'];
 const locate = () => CANDIDATES.find((candidate) => existsSync(join(here, candidate)));
 
-let found = locate();
-
-// Hostinger clone le dépôt et installe les dépendances dans le répertoire
-// d'exécution, mais n'y recopie PAS le résultat du build : celui-ci reste dans
-// le répertoire de compilation, d'où il part vers la racine web. On compile donc
-// ici au premier démarrage — les sources et `node_modules` sont présents, et
-// l'opération prend deux à trois secondes.
 /** Page d'attente servie pendant la compilation, rafraîchie toute seule. */
 const HOLDING_PAGE = `<!doctype html><html lang="fr"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -75,45 +73,50 @@ function runBuild(astroCli) {
   });
 }
 
-if (!found) {
+/**
+ * Hostinger clone le dépôt et installe les dépendances dans le répertoire
+ * d'exécution, mais n'y recopie PAS le résultat du build : celui-ci reste dans
+ * le répertoire de compilation, d'où il part vers la racine web. On compile donc
+ * ici au premier démarrage — les sources et `node_modules` sont présents.
+ */
+async function buildNow() {
   // On invoque le CLI d'Astro avec le binaire Node courant, sans passer par
   // `npm` : celui-ci n'est pas dans le PATH du runtime Hostinger (code 127).
   const astroCli = join(here, 'node_modules', 'astro', 'bin', 'astro.mjs');
-  if (!existsSync(astroCli)) {
-    console.error(`[thirion-expertise] CLI Astro introuvable : ${astroCli}`);
-    process.exit(1);
-  }
+  if (!existsSync(astroCli)) throw new Error(`CLI Astro introuvable : ${astroCli}`);
 
   const placeholder = await holdPort();
   console.log('[thirion-expertise] Port réservé — compilation…');
 
   try {
     await runBuild(astroCli);
-  } catch (err) {
-    console.error(`[thirion-expertise] La compilation a échoué (${err.message}).`);
-    process.exit(1);
+  } finally {
+    // Libérer le port dans tous les cas, pour ne pas bloquer un redémarrage.
+    placeholder.closeAllConnections?.();
+    await new Promise((resolve) => placeholder.close(resolve));
+  }
+}
+
+async function main() {
+  let found = locate();
+
+  if (!found) {
+    await buildNow();
+    found = locate();
   }
 
-  found = locate();
+  if (!found) {
+    throw new Error(
+      `entry.mjs introuvable après compilation. Cherché : ${CANDIDATES.join(', ')}.\n` +
+        `Contenu de ${here} : ${readdirSync(here).join(', ')}`,
+    );
+  }
 
-  // Libérer le port avant de passer la main au vrai serveur.
-  placeholder.closeAllConnections?.();
-  await new Promise((resolve) => placeholder.close(resolve));
+  console.log(`[thirion-expertise] Serveur trouvé : ${found}`);
+  await import(pathToFileURL(join(here, found)).href);
 }
 
-if (!found) {
-  console.error(
-    `[thirion-expertise] entry.mjs introuvable après compilation. Cherché : ${CANDIDATES.join(', ')}.\n` +
-      `Contenu de ${here} : ${readdirSync(here).join(', ')}`,
-  );
-  process.exit(1);
-}
-
-console.log(`[thirion-expertise] Serveur trouvé : ${found}`);
-
-// URL absolue plutôt que chemin relatif : `import()` résoudrait le relatif
-// depuis ce fichier, ce qui marche, mais l'URL rend l'échec plus lisible.
-import(pathToFileURL(join(here, found)).href).catch((err) => {
+main().catch((err) => {
   console.error("[thirion-expertise] Le serveur n'a pas pu démarrer :", err);
   process.exit(1);
 });
