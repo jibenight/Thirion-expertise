@@ -128,7 +128,7 @@ hPanel → **Sites web → Web Apps → Commencer** → import depuis GitHub
 | **Fichier d'entrée** | **`server.js`** |
 
 Ajouter dans la même page les variables d'environnement du formulaire de contact
-(`SMTP_USER`, `SMTP_PASS`, `CONTACT_TO`, `CONTACT_FROM` — voir `.env.example`),
+(`RESEND_API_KEY`, `CONTACT_TO`, `CONTACT_FROM` — voir `.env.example`),
 puis rattacher le domaine `thirion-expertise.fr` — il est chez Hostinger mais
 encore parqué.
 

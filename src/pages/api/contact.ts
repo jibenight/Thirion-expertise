@@ -1,18 +1,16 @@
 import type { APIRoute } from 'astro';
-import nodemailer from 'nodemailer';
 
 // Route rendue à la demande (exécutée par le serveur Node, pas prérendue).
 export const prerender = false;
 
+// Envoi via l'API HTTP de Resend plutôt qu'en SMTP : un appel HTTPS sur le port
+// 443 passe partout, là où les ports SMTP sortants (465, 587) sont fréquemment
+// bloqués en hébergement mutualisé. Aucune dépendance non plus — `fetch` suffit.
+
 // Destination par défaut si CONTACT_TO n'est pas défini (repli sur l'email du cabinet).
 const DEFAULT_TO = 'thirionexpertise@gmail.com';
-// Expéditeur affiché : l'alias `contact@`, plus lisible que la boîte personnelle.
-// L'authentification SMTP, elle, se fait avec la vraie boîte (SMTP_USER) — un
-// alias n'a pas d'identifiants propres.
+// Expéditeur : doit appartenir à un domaine vérifié dans Resend.
 const DEFAULT_FROM = 'Thirion Expertise <contact@thirion-expertise.fr>';
-// SMTP Hostinger par défaut ; 465 = TLS implicite (587 = STARTTLS si besoin).
-const DEFAULT_SMTP_HOST = 'smtp.hostinger.com';
-const DEFAULT_SMTP_PORT = '465';
 
 /**
  * Lit une variable d'environnement :
@@ -21,27 +19,6 @@ const DEFAULT_SMTP_PORT = '465';
  */
 function getEnv(key: string): string | undefined {
   return import.meta.env[key] ?? process.env[key];
-}
-
-// Le transporteur ouvre un pool de connexions : on le garde pour la durée de vie
-// du process plutôt que d'en recréer un à chaque demande de contact.
-let transporter: ReturnType<typeof nodemailer.createTransport> | null = null;
-
-function getTransporter() {
-  if (transporter) return transporter;
-
-  const user = getEnv('SMTP_USER');
-  const pass = getEnv('SMTP_PASS');
-  if (!user || !pass) return null;
-
-  const port = Number(getEnv('SMTP_PORT') ?? DEFAULT_SMTP_PORT);
-  transporter = nodemailer.createTransport({
-    host: getEnv('SMTP_HOST') ?? DEFAULT_SMTP_HOST,
-    port,
-    secure: port === 465,
-    auth: { user, pass },
-  });
-  return transporter;
 }
 
 function json(data: unknown, status = 200): Response {
@@ -85,9 +62,9 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ ok: false, error: 'Adresse email invalide.' }, 400);
   }
 
-  const mailer = getTransporter();
-  if (!mailer) {
-    console.error('SMTP_USER / SMTP_PASS manquants.');
+  const apiKey = getEnv('RESEND_API_KEY');
+  if (!apiKey) {
+    console.error('RESEND_API_KEY manquant.');
     return json({ ok: false, error: "Le service d'envoi n'est pas configuré." }, 500);
   }
 
@@ -106,22 +83,30 @@ export const POST: APIRoute = async ({ request }) => {
     `<hr /><p>${escapeHtml(message).replace(/\n/g, '<br />')}</p>`;
 
   try {
-    await mailer.sendMail({
-      from,
-      to,
-      // Répondre au message écrit directement au visiteur, pas à la boîte du site.
-      replyTo: email,
-      // L'enveloppe SMTP part de la boîte authentifiée, pas de l'alias affiché :
-      // certains serveurs refusent un MAIL FROM qui ne leur appartient pas. Les
-      // deux adresses sont sur thirion-expertise.fr, donc SPF et DKIM restent
-      // alignés. Les non-remises reviennent sur la boîte réelle.
-      envelope: { from: getEnv('SMTP_USER'), to },
-      subject: `[Contact site] ${subject}`,
-      text,
-      html,
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${apiKey}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        from,
+        to: [to],
+        // Répondre au message écrit directement au visiteur, pas à la boîte du site.
+        reply_to: email,
+        subject: `[Contact site] ${subject}`,
+        text,
+        html,
+      }),
     });
+
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error('Échec Resend :', res.status, detail);
+      return json({ ok: false, error: "L'envoi a échoué, réessayez plus tard." }, 502);
+    }
   } catch (err) {
-    console.error("Échec de l'envoi SMTP :", err);
+    console.error('Erreur réseau Resend :', err);
     return json({ ok: false, error: "L'envoi a échoué, réessayez plus tard." }, 502);
   }
 

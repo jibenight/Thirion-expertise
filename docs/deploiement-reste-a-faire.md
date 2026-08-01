@@ -47,8 +47,8 @@ au démarrage : `ERR_MODULE_NOT_FOUND`.
 - **Adaptateur Node** (`@astrojs/node`, mode `standalone`) + script `npm start`.
 - Admin **en français** (`locale: 'fr-FR'` + `scripts/i18n-keystatic.cjs`).
 - Édition locale : `npm run dev` → http://localhost:4321/keystatic
-- **Formulaire de contact** : endpoint `/api/contact` qui envoie en **SMTP**
-  (`nodemailer`) depuis la boîte du domaine — aucun service tiers.
+- **Formulaire de contact** : endpoint `/api/contact` qui envoie via l'**API HTTP
+  de Resend**, sans dépendance (un simple `fetch`).
 - **Vérifié en local sur Node 22** (`npm run build && npm start`) : `/` servie,
   `/robots.txt` variable selon l'hôte, `/api/contact` exécuté, **`/keystatic`
   répond 200**. C'était le seul maillon jamais testé côté Cloudflare — il est levé.
@@ -73,32 +73,28 @@ au démarrage : `ERR_MODULE_NOT_FOUND`.
 
    | Nom | Valeur |
    |---|---|
-   | `SMTP_HOST` | `smtp.hostinger.com` |
-   | `SMTP_PORT` | `465` |
-   | `SMTP_USER` | `david@thirion-expertise.fr` — la **vraie** boîte |
-   | `SMTP_PASS` | mot de passe de cette boîte — **secret** |
+   | `RESEND_API_KEY` | la clé Resend — **secret** |
    | `CONTACT_TO` | `thirionexpertise@gmail.com` |
    | `CONTACT_FROM` | `Thirion Expertise <contact@thirion-expertise.fr>` |
-
-   `SMTP_HOST` et `SMTP_PORT` ont ces valeurs par défaut dans le code : les
-   déclarer n'est utile que pour en changer (587 si le 465 pose problème).
 
 3. **Domaine** : `thirion-expertise.fr` est déjà chez Hostinger mais **parqué**
    (NS `lunar/solar.dns-parking.com`, aucun enregistrement A). Le rattacher à la
    Web App depuis hPanel.
 
-4. **Formulaire de contact (SMTP)** :
-   - Boîte `david@thirion-expertise.fr` avec l'alias `contact@` (fait).
-     Hostinger pose les enregistrements SPF/DKIM du domaine automatiquement.
-   - `SMTP_USER` / `SMTP_PASS` = la **boîte réelle** : un alias n'a pas
-     d'identifiants. `CONTACT_FROM` affiche l'alias `contact@` ; l'enveloppe SMTP
-     part de `SMTP_USER` (`envelope` dans `contact.ts`), les deux adresses étant
-     sur le même domaine, SPF et DKIM restent alignés.
-   - Dev local : copier `.env.example` en `.env` et y mettre le mot de passe.
-   - ⚠️ **À tester une fois en ligne** : que les Web Apps autorisent le SMTP
-     sortant. Si le port 465 est bloqué, essayer 587 ; si les deux le sont,
-     repli sur une API HTTP type Resend — seul le bloc d'envoi de
-     `src/pages/api/contact.ts` change.
+4. **Formulaire de contact (Resend)** :
+   - Compte sur **resend.com** (gratuit, 3 000 mails/mois).
+   - **Vérifier le domaine** `thirion-expertise.fr` → coller les enregistrements
+     SPF/DKIM fournis dans le **DNS Hostinger**. Sans ça, l'envoi depuis
+     `contact@thirion-expertise.fr` est refusé. La vérification porte sur le
+     domaine : que `contact@` soit un alias de `david@` ne gêne pas.
+   - Créer la clé API et la poser en variable d'environnement (étape 2).
+   - Dev local : copier `.env.example` en `.env` et y mettre la clé.
+
+   > L'envoi passe par l'**API HTTP** de Resend (port 443), et non en SMTP.
+   > Un premier montage en `nodemailer` sur `smtp.hostinger.com` a été
+   > abandonné : les ports SMTP sortants sont fréquemment bloqués en mutualisé,
+   > et rien dans la documentation Hostinger ne permettait de le vérifier avant
+   > la mise en ligne. HTTPS retire cette inconnue.
 
 5. **keystatic.cloud** → projet `thirion-david/thirion-expertise` → réglages →
    renseigner l'**URL de production** `https://thirion-expertise.fr`
