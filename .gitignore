@@ -1,10 +1,7 @@
 # build output
 dist/
+node-server/
 .astro/
-
-# cloudflare / wrangler
-.wrangler/
-.dev.vars
 
 # dependencies
 node_modules/

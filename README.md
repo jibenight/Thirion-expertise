@@ -104,9 +104,9 @@ Il gère le fondu enchaîné, les flèches, les puces, la pause au survol/focus 
 
 ## Déploiement
 
-`npm run build` produit les pages publiques pré-rendues dans `dist/client/` et un serveur Node autonome dans `dist/server/entry.mjs` (adaptateur `@astrojs/node`, mode `standalone`). Ce serveur sert les fichiers statiques **et** les trois routes rendues à la demande : l'admin `/keystatic`, l'endpoint `/api/contact` et `/robots.txt`.
+`npm run build` produit les pages publiques pré-rendues à la racine de `dist/` et un serveur Node autonome dans `node-server/` (adaptateur `@astrojs/node`, mode `standalone`). Ce serveur sert les fichiers statiques **et** les trois routes rendues à la demande : l'admin `/keystatic`, l'endpoint `/api/contact` et `/robots.txt`.
 
-Le build enchaîne ensuite `scripts/hostinger-entry.mjs`, qui écrit `dist/server/start.js` — un lanceur d'une ligne important `entry.mjs`, parce que hPanel n'accepte qu'un fichier d'entrée en `.js`.
+Cette disposition — plutôt que le `dist/client` + `dist/server` par défaut — vient de l'hébergeur, qui monte le répertoire de sortie comme racine web : `dist/` doit donc contenir un `index.html` à sa racine, et le bundle serveur doit rester en dehors. Le site reste ainsi consultable même si l'hébergeur ne démarre pas le process Node. Le lanceur `server.js` à la racine du dépôt démarre ce serveur.
 
 Lancement en production : `npm start` (le serveur écoute sur `$PORT` / `$HOST`). L'hébergement retenu est une **Web App Node.js chez Hostinger**, avec déploiement automatique depuis GitHub — voir [`docs/deploiement-reste-a-faire.md`](docs/deploiement-reste-a-faire.md).
 

@@ -96,7 +96,7 @@ il reste les étapes côté comptes GitHub / Hostinger / Keystatic Cloud.
 - `astro.config.mjs` — adaptateur `@astrojs/node` en mode `standalone` : les
   pages publiques restent pré-rendues, seules `/keystatic`, `/api/contact` et
   `/robots.txt` sont rendues à la demande. Admin activé.
-- `package.json` — `npm start` → `node ./dist/server/start.js`, le serveur
+- `package.json` — `npm start` → `node ./server.js`, le serveur
   autonome produit par le build (c'est le « fichier d'entrée » attendu par hPanel).
 
 ### Étape 1 — Pousser le code sur GitHub
@@ -125,7 +125,7 @@ hPanel → **Sites web → Web Apps → Commencer** → import depuis GitHub
 | Répertoire root | `./` |
 | Commande de compilation | `npm run build` |
 | Répertoire de sortie | `dist` |
-| **Fichier d'entrée** | **`dist/server/start.js`** |
+| **Fichier d'entrée** | **`server.js`** |
 
 Ajouter dans la même page les variables d'environnement du formulaire de contact
 (`SMTP_USER`, `SMTP_PASS`, `CONTACT_TO`, `CONTACT_FROM` — voir `.env.example`),

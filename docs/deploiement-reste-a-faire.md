@@ -14,13 +14,31 @@ avec déploiement automatique depuis GitHub. Le site tourne donc sur un serveur
 Node 22, ce qui fait fonctionner d'un seul tenant les trois routes rendues à la
 demande : `/keystatic`, `/api/contact` et `/robots.txt`.
 
-L'adaptateur `@astrojs/node` en mode `standalone` produit `dist/server/entry.mjs`,
-un serveur autonome qui sert aussi les fichiers statiques de `dist/client`.
+L'adaptateur `@astrojs/node` en mode `standalone` produit un serveur autonome qui
+sert aussi les fichiers statiques.
 
-> hPanel n'accepte qu'un fichier d'entrée en `.js`. Une étape de post-build
-> (`scripts/hostinger-entry.mjs`, enchaînée dans `npm run build`) écrit donc
-> `dist/server/start.js`, un lanceur d'une ligne qui importe `entry.mjs`.
-> **C'est ce fichier `.js` qu'il faut renseigner dans hPanel.**
+**Disposition du build, dictée par hPanel** (`build.client` / `build.server` dans
+`astro.config.mjs`, résolus depuis `outDir`) :
+
+| Dossier | Contenu |
+|---|---|
+| `dist/` | les pages publiques, **`index.html` à la racine** |
+| `node-server/` | le serveur Node, **en dehors** de la racine web |
+| `server.js` | le lanceur versionné, à la racine du dépôt |
+
+Trois raisons à cette disposition plutôt qu'au `dist/client` + `dist/server` par
+défaut :
+
+1. hPanel monte le répertoire de sortie comme racine web. Sans `index.html` à la
+   racine de `dist/`, la page d'accueil répond **403**.
+2. Avec la disposition par défaut, le bundle serveur devenait **téléchargeable**
+   (`/server/start.js` répondait 200 en production).
+3. Le site reste consultable **même si l'hébergeur ne démarre pas Node** ; seuls
+   le formulaire et l'admin manqueraient alors à l'appel.
+
+> hPanel valide le champ « Fichier d'entrée » sur l'extension `.js` et refuse
+> `.mjs`. D'où `server.js`, qui fait un `import()` dynamique de
+> `node-server/entry.mjs` — valide que Node le charge en ESM ou en CommonJS.
 
 > **Historique** : le site a d'abord été déployé sur Cloudflare Workers
 > (`thirion-expertise.jean-nguyen.workers.dev`). Cet hébergement est abandonné —
@@ -57,7 +75,7 @@ un serveur autonome qui sert aussi les fichiers statiques de `dist/client`.
    | Commande de compilation | `npm run build` |
    | Gestionnaire de paquets | `npm` |
    | Répertoire de sortie | `dist` |
-   | **Fichier d'entrée** | **`dist/server/start.js`** |
+   | **Fichier d'entrée** | **`server.js`** |
 
 2. **Variables d'environnement** (même écran, section *Variables d'environnement*) :
 
@@ -127,4 +145,4 @@ un serveur autonome qui sert aussi les fichiers statiques de `dist/client`.
 | `src/lib/content.ts` | Lecture du contenu au build (API Reader) |
 | `scripts/i18n-keystatic.cjs` | Francisation des libellés (postinstall) |
 | `astro.config.mjs` | Adaptateur Node (standalone) + intégrations |
-| `package.json` | `npm start` → `node ./dist/server/start.js` |
+| `package.json` | `npm start` → `node ./server.js` |

@@ -19,6 +19,18 @@ export default defineConfig({
   site: 'https://thirion-expertise.fr',
   output: 'static',
   adapter: node({ mode: 'standalone' }),
+  // Les pages publiques sont écrites à la RACINE de `dist/`, et le serveur dans
+  // `node-server/`, en dehors. Deux raisons :
+  //  1. hPanel monte le répertoire de sortie comme racine web. Avec la
+  //     disposition par défaut (`dist/client` + `dist/server`), `dist/` n'a pas
+  //     d'`index.html` → 403, et le bundle serveur devient téléchargeable.
+  //  2. Ainsi le site reste consultable même si l'hébergeur ne démarre pas le
+  //     process Node ; seuls le formulaire et l'admin manqueraient à l'appel.
+  // (Ces deux chemins sont résolus depuis `outDir`, pas depuis la racine.)
+  build: {
+    client: './',
+    server: '../node-server',
+  },
   // Le sitemap ne liste que les pages pré-rendues : l'admin et les endpoints,
   // rendus à la demande, en sont exclus d'office. Il est annoncé dans
   // `src/pages/robots.txt.ts`, uniquement sur le domaine canonique.

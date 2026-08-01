@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node scripts/hostinger-entry.mjs",
-    "start": "node ./dist/server/start.js",
+    "build": "astro build",
+    "start": "node ./server.js",
     "preview": "astro preview",
     "postinstall": "node scripts/i18n-keystatic.cjs"
   },
