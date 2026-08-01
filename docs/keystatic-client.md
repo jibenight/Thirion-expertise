@@ -127,9 +127,10 @@ hPanel → **Sites web → Web Apps → Commencer** → import depuis GitHub
 | Répertoire de sortie | `dist` |
 | **Fichier d'entrée** | **`dist/server/entry.mjs`** |
 
-Ajouter dans la même page les variables d'environnement `RESEND_API_KEY`,
-`CONTACT_TO` et `CONTACT_FROM` (formulaire de contact), puis rattacher le domaine
-`thirion-expertise.fr` — il est chez Hostinger mais encore parqué.
+Ajouter dans la même page les variables d'environnement du formulaire de contact
+(`SMTP_USER`, `SMTP_PASS`, `CONTACT_TO`, `CONTACT_FROM` — voir `.env.example`),
+puis rattacher le domaine `thirion-expertise.fr` — il est chez Hostinger mais
+encore parqué.
 
 À chaque `git push` (ou modification enregistrée depuis `/keystatic`), Hostinger
 reconstruit et publie automatiquement.

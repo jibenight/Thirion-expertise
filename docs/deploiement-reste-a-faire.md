@@ -1,7 +1,7 @@
 # Reste à faire — mise en ligne
 
 État au **2026-08-01**. Le code est terminé, commité et poussé sur `origin/main`.
-Ce qui reste dépend des comptes Hostinger / GitHub / Keystatic Cloud / Resend.
+Ce qui reste dépend des comptes Hostinger / GitHub / Keystatic Cloud.
 
 Procédure Keystatic détaillée : [`keystatic-client.md`](keystatic-client.md) §3.
 
@@ -32,7 +32,8 @@ un serveur autonome qui sert aussi les fichiers statiques de `dist/client`.
 - **Adaptateur Node** (`@astrojs/node`, mode `standalone`) + script `npm start`.
 - Admin **en français** (`locale: 'fr-FR'` + `scripts/i18n-keystatic.cjs`).
 - Édition locale : `npm run dev` → http://localhost:4321/keystatic
-- **Formulaire de contact** : endpoint `/api/contact` qui envoie via **Resend**.
+- **Formulaire de contact** : endpoint `/api/contact` qui envoie en **SMTP**
+  (`nodemailer`) depuis la boîte du domaine — aucun service tiers.
 - **Vérifié en local sur Node 22** (`npm run build && npm start`) : `/` servie,
   `/robots.txt` variable selon l'hôte, `/api/contact` exécuté, **`/keystatic`
   répond 200**. C'était le seul maillon jamais testé côté Cloudflare — il est levé.
@@ -57,21 +58,31 @@ un serveur autonome qui sert aussi les fichiers statiques de `dist/client`.
 
    | Nom | Valeur |
    |---|---|
-   | `RESEND_API_KEY` | la clé Resend — **secret** |
+   | `SMTP_HOST` | `smtp.hostinger.com` |
+   | `SMTP_PORT` | `465` |
+   | `SMTP_USER` | `contact@thirion-expertise.fr` |
+   | `SMTP_PASS` | mot de passe de la boîte — **secret** |
    | `CONTACT_TO` | `thirionexpertise@gmail.com` |
    | `CONTACT_FROM` | `Thirion Expertise <contact@thirion-expertise.fr>` |
+
+   `SMTP_HOST` et `SMTP_PORT` ont ces valeurs par défaut dans le code : les
+   déclarer n'est utile que pour en changer (587 si le 465 pose problème).
 
 3. **Domaine** : `thirion-expertise.fr` est déjà chez Hostinger mais **parqué**
    (NS `lunar/solar.dns-parking.com`, aucun enregistrement A). Le rattacher à la
    Web App depuis hPanel.
 
-4. **Formulaire de contact (Resend)** :
-   - Compte sur **resend.com** (gratuit, 3 000 mails/mois).
-   - **Vérifier le domaine** `thirion-expertise.fr` → coller les enregistrements
-     SPF/DKIM fournis dans le **DNS Hostinger**. Sans ça, l'envoi depuis
-     `contact@thirion-expertise.fr` est refusé.
-   - Créer la clé API et la poser en variable d'environnement (étape 2).
-   - Dev local : copier `.env.example` en `.env` et y mettre la clé.
+4. **Formulaire de contact (SMTP)** :
+   - hPanel → **Emails** → créer la boîte `contact@thirion-expertise.fr`.
+     Hostinger pose les enregistrements SPF/DKIM du domaine automatiquement.
+   - Reporter l'adresse et son mot de passe dans `SMTP_USER` / `SMTP_PASS`
+     (étape 2). `CONTACT_FROM` doit correspondre à cette boîte, sinon le serveur
+     SMTP refuse l'envoi.
+   - Dev local : copier `.env.example` en `.env` et y mettre le mot de passe.
+   - ⚠️ **À tester une fois en ligne** : que les Web Apps autorisent le SMTP
+     sortant. Si le port 465 est bloqué, essayer 587 ; si les deux le sont,
+     repli sur une API HTTP type Resend — seul le bloc d'envoi de
+     `src/pages/api/contact.ts` change.
 
 5. **keystatic.cloud** → projet `thirion-david/thirion-expertise` → réglages →
    renseigner l'**URL de production** `https://thirion-expertise.fr`
