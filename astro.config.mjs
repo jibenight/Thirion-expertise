@@ -3,6 +3,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
 import node from '@astrojs/node';
+import sitemap from '@astrojs/sitemap';
 
 // Les pages publiques restent pré-rendues en statique (`output: 'static'`).
 // Seules les routes marquées `prerender = false` sont rendues à la demande :
@@ -18,7 +19,10 @@ export default defineConfig({
   site: 'https://thirion-expertise.fr',
   output: 'static',
   adapter: node({ mode: 'standalone' }),
-  integrations: [react(), keystatic()],
+  // Le sitemap ne liste que les pages pré-rendues : l'admin et les endpoints,
+  // rendus à la demande, en sont exclus d'office. Il est annoncé dans
+  // `src/pages/robots.txt.ts`, uniquement sur le domaine canonique.
+  integrations: [react(), keystatic(), sitemap()],
   vite: {
     plugins: [tailwindcss()],
   },

@@ -13,8 +13,10 @@ export const GET: APIRoute = ({ request }) => {
   const host = (request.headers.get('host') ?? '').toLowerCase();
   const isCanonical = host === CANONICAL_HOST || host === `www.${CANONICAL_HOST}`;
 
+  // Le sitemap n'est annoncé que sur le domaine canonique : ailleurs, tout est
+  // interdit à l'indexation, l'annoncer n'aurait pas de sens.
   const body = isCanonical
-    ? 'User-agent: *\nAllow: /\n'
+    ? `User-agent: *\nAllow: /\n\nSitemap: https://${CANONICAL_HOST}/sitemap-index.xml\n`
     : 'User-agent: *\nDisallow: /\n';
 
   return new Response(body, {
