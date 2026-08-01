@@ -38,10 +38,21 @@ let found = locate();
 // l'opération prend deux à trois secondes.
 if (!found) {
   console.log('[thirion-expertise] Build absent du répertoire d’exécution — compilation…');
-  const build = spawnSync('npm', ['run', 'build'], { cwd: here, stdio: 'inherit', shell: true });
 
+  // On invoque le CLI d'Astro avec le binaire Node courant, sans passer par
+  // `npm` : celui-ci n'est pas dans le PATH du runtime Hostinger (code 127).
+  const astroCli = join(here, 'node_modules', 'astro', 'bin', 'astro.mjs');
+  if (!existsSync(astroCli)) {
+    console.error(`[thirion-expertise] CLI Astro introuvable : ${astroCli}`);
+    process.exit(1);
+  }
+
+  const build = spawnSync(process.execPath, [astroCli, 'build'], { cwd: here, stdio: 'inherit' });
   if (build.status !== 0) {
-    console.error(`[thirion-expertise] La compilation a échoué (code ${build.status}).`);
+    console.error(
+      `[thirion-expertise] La compilation a échoué (code ${build.status}` +
+        `${build.error ? `, ${build.error.message}` : ''}).`,
+    );
     process.exit(1);
   }
   found = locate();
