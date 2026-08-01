@@ -6,7 +6,9 @@ export const prerender = false;
 
 // Destination par défaut si CONTACT_TO n'est pas défini (repli sur l'email du cabinet).
 const DEFAULT_TO = 'thirionexpertise@gmail.com';
-// Expéditeur par défaut : la boîte du domaine, hébergée chez Hostinger.
+// Expéditeur affiché : l'alias `contact@`, plus lisible que la boîte personnelle.
+// L'authentification SMTP, elle, se fait avec la vraie boîte (SMTP_USER) — un
+// alias n'a pas d'identifiants propres.
 const DEFAULT_FROM = 'Thirion Expertise <contact@thirion-expertise.fr>';
 // SMTP Hostinger par défaut ; 465 = TLS implicite (587 = STARTTLS si besoin).
 const DEFAULT_SMTP_HOST = 'smtp.hostinger.com';
@@ -109,6 +111,11 @@ export const POST: APIRoute = async ({ request }) => {
       to,
       // Répondre au message écrit directement au visiteur, pas à la boîte du site.
       replyTo: email,
+      // L'enveloppe SMTP part de la boîte authentifiée, pas de l'alias affiché :
+      // certains serveurs refusent un MAIL FROM qui ne leur appartient pas. Les
+      // deux adresses sont sur thirion-expertise.fr, donc SPF et DKIM restent
+      // alignés. Les non-remises reviennent sur la boîte réelle.
+      envelope: { from: getEnv('SMTP_USER'), to },
       subject: `[Contact site] ${subject}`,
       text,
       html,

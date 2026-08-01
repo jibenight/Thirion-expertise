@@ -60,8 +60,8 @@ un serveur autonome qui sert aussi les fichiers statiques de `dist/client`.
    |---|---|
    | `SMTP_HOST` | `smtp.hostinger.com` |
    | `SMTP_PORT` | `465` |
-   | `SMTP_USER` | `contact@thirion-expertise.fr` |
-   | `SMTP_PASS` | mot de passe de la boîte — **secret** |
+   | `SMTP_USER` | `david@thirion-expertise.fr` — la **vraie** boîte |
+   | `SMTP_PASS` | mot de passe de cette boîte — **secret** |
    | `CONTACT_TO` | `thirionexpertise@gmail.com` |
    | `CONTACT_FROM` | `Thirion Expertise <contact@thirion-expertise.fr>` |
 
@@ -73,11 +73,12 @@ un serveur autonome qui sert aussi les fichiers statiques de `dist/client`.
    Web App depuis hPanel.
 
 4. **Formulaire de contact (SMTP)** :
-   - hPanel → **Emails** → créer la boîte `contact@thirion-expertise.fr`.
+   - Boîte `david@thirion-expertise.fr` avec l'alias `contact@` (fait).
      Hostinger pose les enregistrements SPF/DKIM du domaine automatiquement.
-   - Reporter l'adresse et son mot de passe dans `SMTP_USER` / `SMTP_PASS`
-     (étape 2). `CONTACT_FROM` doit correspondre à cette boîte, sinon le serveur
-     SMTP refuse l'envoi.
+   - `SMTP_USER` / `SMTP_PASS` = la **boîte réelle** : un alias n'a pas
+     d'identifiants. `CONTACT_FROM` affiche l'alias `contact@` ; l'enveloppe SMTP
+     part de `SMTP_USER` (`envelope` dans `contact.ts`), les deux adresses étant
+     sur le même domaine, SPF et DKIM restent alignés.
    - Dev local : copier `.env.example` en `.env` et y mettre le mot de passe.
    - ⚠️ **À tester une fois en ligne** : que les Web Apps autorisent le SMTP
      sortant. Si le port 465 est bloqué, essayer 587 ; si les deux le sont,
