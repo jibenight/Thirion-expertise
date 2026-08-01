@@ -84,20 +84,20 @@ Toutes les images ci-dessous sont **modifiables et ajoutables** via le bouton
 Cloud enregistre la modification sur le dépôt → l'hébergeur reconstruit et publie
 automatiquement (~1–2 min).
 
-Hébergement retenu : **Cloudflare Workers** (build Git automatique via *Workers
-Builds*). La configuration du code est **déjà en place** (voir plus bas) ; il
-reste les étapes côté comptes GitHub / Cloudflare / Keystatic Cloud.
+Hébergement retenu : **Web App Node.js chez Hostinger** (build Git automatique
+depuis GitHub). La configuration du code est **déjà en place** (voir plus bas) ;
+il reste les étapes côté comptes GitHub / Hostinger / Keystatic Cloud.
 
 ### Ce qui est déjà configuré dans le projet
 
 - `keystatic.config.ts` — stockage **local en `dev`**, **Keystatic Cloud en
   production** (`storage: import.meta.env.DEV ? local : cloud`), projet
   `thirion-david/thirion-expertise`.
-- `astro.config.mjs` — adaptateur `@astrojs/cloudflare` avec
-  `prerenderEnvironment: 'node'` (les pages statiques sont pré-rendues en Node,
-  seule `/keystatic` tourne comme fonction), admin activé.
-- `wrangler.jsonc` — `nodejs_compat` + `compatibility_date` (requis par
-  l'admin sur le runtime Cloudflare).
+- `astro.config.mjs` — adaptateur `@astrojs/node` en mode `standalone` : les
+  pages publiques restent pré-rendues, seules `/keystatic`, `/api/contact` et
+  `/robots.txt` sont rendues à la demande. Admin activé.
+- `package.json` — `npm start` → `node ./dist/server/entry.mjs`, le serveur
+  autonome produit par le build (c'est le « fichier d'entrée » attendu par hPanel).
 
 ### Étape 1 — Pousser le code sur GitHub
 
@@ -112,32 +112,37 @@ Dans les réglages du projet sur **keystatic.cloud**, renseigner l'**URL de
 production** du site (`https://thirion-expertise.fr`) pour autoriser la connexion
 du client depuis cette adresse.
 
-### Étape 3 — Déployer sur Cloudflare Workers
+### Étape 3 — Déployer la Web App Hostinger
 
-> ⚠️ L'adaptateur Astro pour Cloudflare déploie sur **Workers**, **plus sur
-> Cloudflare Pages**. Utiliser *Workers Builds* (intégration Git).
+hPanel → **Sites web → Web Apps → Commencer** → import depuis GitHub
+`jibenight/Thirion-expertise`.
 
-1. Cloudflare → **Workers & Pages** → **Create** → **Import a repository** →
-   sélectionner `jibenight/Thirion-expertise`.
-2. **Build command** : `npm run build`.
-3. `nodejs_compat` et la `compatibility_date` sont déjà dans `wrangler.jsonc` —
-   Cloudflare les applique automatiquement.
-4. Le namespace **KV `SESSION`** (utilisé par l'admin) est **auto-provisionné**
-   par Wrangler au déploiement — rien à créer à la main.
-5. Ajouter le **domaine personnalisé** `thirion-expertise.fr` au Worker.
+| Champ | Valeur |
+|---|---|
+| Préréglage de framework | Astro |
+| Branche | `main` |
+| Version de Node | `22.x` |
+| Répertoire root | `./` |
+| Commande de compilation | `npm run build` |
+| Répertoire de sortie | `dist` |
+| **Fichier d'entrée** | **`dist/server/entry.mjs`** |
 
-À chaque `git push` (ou modification enregistrée depuis `/keystatic`), Cloudflare
+Ajouter dans la même page les variables d'environnement `RESEND_API_KEY`,
+`CONTACT_TO` et `CONTACT_FROM` (formulaire de contact), puis rattacher le domaine
+`thirion-expertise.fr` — il est chez Hostinger mais encore parqué.
+
+À chaque `git push` (ou modification enregistrée depuis `/keystatic`), Hostinger
 reconstruit et publie automatiquement.
 
 ### Résultat
 
 Le client va sur `https://thirion-expertise.fr/keystatic`, se connecte avec son
 **e-mail**, modifie le contenu, clique **Save** → Keystatic Cloud enregistre sur
-GitHub → Cloudflare reconstruit et publie — **sans aucune intervention technique**.
+GitHub → Hostinger reconstruit et publie — **sans aucune intervention technique**.
 
-> Note : si l'admin rencontrait une limite du runtime edge de Cloudflare, le
-> repli est immédiat — remplacer l'adaptateur par `@astrojs/netlify` (runtime
-> Node, sans `wrangler.jsonc` ni KV) sans rien changer d'autre.
+> L'admin a été vérifiée en local sur Node 22 (`npm run build && npm start`) :
+> `/keystatic` répond 200. Le doute qui pesait sur le runtime edge de Cloudflare
+> n'a plus lieu d'être avec un runtime Node.
 
 ---
 
@@ -147,10 +152,10 @@ GitHub → Cloudflare reconstruit et publie — **sans aucune intervention techn
   (source unique de vérité) ; stockage local en `dev`, Cloud en production.
 - `src/lib/content.ts` : lit le contenu au build via l'**API Reader** de
   Keystatic (pages publiques pré-rendues en statique).
-- `astro.config.mjs` : adaptateur Cloudflare + admin (`react()` + `keystatic()`) ;
-  `output: 'static'` → seules les routes `/keystatic` et `/api/keystatic` sont
-  rendues à la demande.
-- `wrangler.jsonc` : `nodejs_compat` + `compatibility_date` pour la fonction admin.
+- `astro.config.mjs` : adaptateur Node + admin (`react()` + `keystatic()`) ;
+  `output: 'static'` → seules les routes marquées `prerender = false` sont
+  rendues à la demande (`/keystatic`, `/api/keystatic`, `/api/contact`,
+  `/robots.txt`).
 
 ### Interface d'administration en français
 

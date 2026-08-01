@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 
-// Route rendue à la demande (exécutée sur le Worker Cloudflare, pas prérendue).
+// Route rendue à la demande (exécutée par le serveur Node, pas prérendue).
 export const prerender = false;
 
 // Destination par défaut si CONTACT_TO n'est pas défini (repli sur l'email du cabinet).
@@ -10,12 +10,11 @@ const DEFAULT_FROM = 'Thirion Expertise <contact@thirion-expertise.fr>';
 
 /**
  * Lit une variable d'environnement :
- * - en production Cloudflare via `locals.runtime.env` (secrets Wrangler) ;
- * - en développement via `import.meta.env` / `process.env` (fichier .env).
+ * - en développement via `import.meta.env` (fichier `.env`) ;
+ * - en production via `process.env` (variables déclarées dans hPanel).
  */
-function getEnv(locals: App.Locals, key: string): string | undefined {
-  const runtimeEnv = (locals as { runtime?: { env?: Record<string, string> } })?.runtime?.env;
-  return runtimeEnv?.[key] ?? import.meta.env[key] ?? (globalThis as any).process?.env?.[key];
+function getEnv(key: string): string | undefined {
+  return import.meta.env[key] ?? process.env[key];
 }
 
 function json(data: unknown, status = 200): Response {
@@ -30,7 +29,7 @@ const escapeHtml = (value: string): string =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] ?? c,
   );
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request }) => {
   let payload: Record<string, string>;
   try {
     const contentType = request.headers.get('content-type') ?? '';
@@ -59,14 +58,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return json({ ok: false, error: 'Adresse email invalide.' }, 400);
   }
 
-  const apiKey = getEnv(locals, 'RESEND_API_KEY');
+  const apiKey = getEnv('RESEND_API_KEY');
   if (!apiKey) {
     console.error('RESEND_API_KEY manquant.');
     return json({ ok: false, error: "Le service d'envoi n'est pas configuré." }, 500);
   }
 
-  const to = getEnv(locals, 'CONTACT_TO') ?? DEFAULT_TO;
-  const from = getEnv(locals, 'CONTACT_FROM') ?? DEFAULT_FROM;
+  const to = getEnv('CONTACT_TO') ?? DEFAULT_TO;
+  const from = getEnv('CONTACT_FROM') ?? DEFAULT_FROM;
 
   const text =
     `Nom : ${name}\n` +
