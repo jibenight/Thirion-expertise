@@ -17,6 +17,11 @@ demande : `/keystatic`, `/api/contact` et `/robots.txt`.
 L'adaptateur `@astrojs/node` en mode `standalone` produit `dist/server/entry.mjs`,
 un serveur autonome qui sert aussi les fichiers statiques de `dist/client`.
 
+> hPanel n'accepte qu'un fichier d'entrée en `.js`. Une étape de post-build
+> (`scripts/hostinger-entry.mjs`, enchaînée dans `npm run build`) écrit donc
+> `dist/server/start.js`, un lanceur d'une ligne qui importe `entry.mjs`.
+> **C'est ce fichier `.js` qu'il faut renseigner dans hPanel.**
+
 > **Historique** : le site a d'abord été déployé sur Cloudflare Workers
 > (`thirion-expertise.jean-nguyen.workers.dev`). Cet hébergement est abandonné —
 > `@astrojs/cloudflare`, `wrangler` et `wrangler.jsonc` ont été retirés.
@@ -52,7 +57,7 @@ un serveur autonome qui sert aussi les fichiers statiques de `dist/client`.
    | Commande de compilation | `npm run build` |
    | Gestionnaire de paquets | `npm` |
    | Répertoire de sortie | `dist` |
-   | **Fichier d'entrée** | **`dist/server/entry.mjs`** |
+   | **Fichier d'entrée** | **`dist/server/start.js`** |
 
 2. **Variables d'environnement** (même écran, section *Variables d'environnement*) :
 
@@ -122,4 +127,4 @@ un serveur autonome qui sert aussi les fichiers statiques de `dist/client`.
 | `src/lib/content.ts` | Lecture du contenu au build (API Reader) |
 | `scripts/i18n-keystatic.cjs` | Francisation des libellés (postinstall) |
 | `astro.config.mjs` | Adaptateur Node (standalone) + intégrations |
-| `package.json` | `npm start` → `node ./dist/server/entry.mjs` |
+| `package.json` | `npm start` → `node ./dist/server/start.js` |

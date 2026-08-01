@@ -106,6 +106,8 @@ Il gère le fondu enchaîné, les flèches, les puces, la pause au survol/focus 
 
 `npm run build` produit les pages publiques pré-rendues dans `dist/client/` et un serveur Node autonome dans `dist/server/entry.mjs` (adaptateur `@astrojs/node`, mode `standalone`). Ce serveur sert les fichiers statiques **et** les trois routes rendues à la demande : l'admin `/keystatic`, l'endpoint `/api/contact` et `/robots.txt`.
 
+Le build enchaîne ensuite `scripts/hostinger-entry.mjs`, qui écrit `dist/server/start.js` — un lanceur d'une ligne important `entry.mjs`, parce que hPanel n'accepte qu'un fichier d'entrée en `.js`.
+
 Lancement en production : `npm start` (le serveur écoute sur `$PORT` / `$HOST`). L'hébergement retenu est une **Web App Node.js chez Hostinger**, avec déploiement automatique depuis GitHub — voir [`docs/deploiement-reste-a-faire.md`](docs/deploiement-reste-a-faire.md).
 
 La propriété `site` de `astro.config.mjs` (`https://thirion-expertise.fr`) est utilisée pour générer les URL absolues.
