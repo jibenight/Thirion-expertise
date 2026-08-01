@@ -104,11 +104,9 @@ Il gère le fondu enchaîné, les flèches, les puces, la pause au survol/focus 
 
 ## Déploiement
 
-`npm run build` produit les pages publiques pré-rendues dans `dist/client/` et un serveur Node autonome dans `dist/server/` (adaptateur `@astrojs/node`, mode `standalone`). Ce serveur sert les fichiers statiques **et** les trois routes rendues à la demande : l'admin `/keystatic`, l'endpoint `/api/contact` et `/robots.txt`.
+`npm run build` produit les pages publiques pré-rendues dans `dist/client/` et le Worker dans `dist/server/` (adaptateur `@astrojs/cloudflare`, branché au build seulement). Trois routes sont rendues à la demande par le Worker : l'admin `/keystatic`, l'endpoint `/api/contact` et `/robots.txt` ; tout le reste est statique.
 
-Le lanceur `server.js`, à la racine du dépôt, démarre ce serveur — l'hébergeur n'accepte qu'un fichier d'entrée en `.js`. `npm start` l'appelle.
-
-Lancement en production : `npm start` (le serveur écoute sur `$PORT` / `$HOST`). L'hébergement retenu est une **Web App Node.js chez Hostinger**, avec déploiement automatique depuis GitHub — voir [`docs/deploiement-reste-a-faire.md`](docs/deploiement-reste-a-faire.md).
+L'hébergement est **Cloudflare Workers**, avec déploiement automatique depuis GitHub via *Workers Builds*. Aperçu local sur le vrai runtime : `npx wrangler dev -c dist/server/wrangler.json --local`. Voir [`docs/deploiement-reste-a-faire.md`](docs/deploiement-reste-a-faire.md).
 
 La propriété `site` de `astro.config.mjs` (`https://thirion-expertise.fr`) est utilisée pour générer les URL absolues.
 

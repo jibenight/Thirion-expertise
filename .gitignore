@@ -2,6 +2,10 @@
 dist/
 .astro/
 
+# cloudflare / wrangler
+.wrangler/
+.dev.vars
+
 # dependencies
 node_modules/
 

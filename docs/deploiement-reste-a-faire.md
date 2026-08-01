@@ -1,40 +1,27 @@
 # Reste à faire — mise en ligne
 
-État au **2026-08-01**. Le code est terminé, commité et poussé sur `origin/main`.
-Ce qui reste dépend des comptes Hostinger / GitHub / Keystatic Cloud.
+État au **2026-08-02**. Le code est terminé, commité et poussé sur `origin/main`.
+Ce qui reste dépend des comptes Cloudflare / GitHub / Keystatic Cloud / Resend.
 
 Procédure Keystatic détaillée : [`keystatic-client.md`](keystatic-client.md) §3.
 
 ---
 
-## Hébergement retenu : Hostinger, Web App Node.js
+## Hébergement : Cloudflare Workers
 
-Le plan **Business** du client (expire le 2027-06-01) inclut les Web Apps Node.js
-avec déploiement automatique depuis GitHub. Le site tourne donc sur un serveur
-Node 22, ce qui fait fonctionner d'un seul tenant les trois routes rendues à la
-demande : `/keystatic`, `/api/contact` et `/robots.txt`.
+Les pages publiques sont pré-rendues (`output: 'static'`) ; trois routes sont
+rendues à la demande par le Worker : l'admin `/keystatic`, l'endpoint
+`/api/contact` et `/robots.txt`.
 
-L'adaptateur `@astrojs/node` en mode `standalone` produit un serveur autonome qui
-sert aussi les fichiers statiques.
-
-**Disposition du build** : `dist/client` (pages publiques) + `dist/server`
-(serveur Node), la disposition par défaut de l'adaptateur. Hostinger ne recopie
-dans le répertoire d'exécution que le **répertoire de sortie** et les fichiers
-**versionnés** — un bundle écrit ailleurs (essai avec `node-server/`) est absent
-au démarrage : `ERR_MODULE_NOT_FOUND`.
-
-> hPanel valide le champ « Fichier d'entrée » sur l'extension `.js` et refuse
-> `.mjs`. D'où `server.js`, versionné à la racine du dépôt, qui fait un
-> `import()` dynamique de `dist/server/entry.mjs`.
-
-> ⚠️ **Le préréglage de framework doit être `Express`, pas `Astro`.** Le
-> préréglage Astro traite le projet comme un site statique : il publie le
-> répertoire de sortie sans jamais démarrer Node, et refuse même qu'on renseigne
-> un fichier d'entrée. Avec `Express`, la plateforme lance bien le process.
-
-> **Historique** : le site a d'abord été déployé sur Cloudflare Workers
-> (`thirion-expertise.jean-nguyen.workers.dev`). Cet hébergement est abandonné —
-> `@astrojs/cloudflare`, `wrangler` et `wrangler.jsonc` ont été retirés.
+> **Tentative Hostinger abandonnée (nuit du 1ᵉʳ au 2 août).** Le plan Business du
+> client inclut des Web Apps Node, mais leur runtime — LiteSpeed `lsnode` —
+> impose une série de contraintes non documentées, découvertes une par une :
+> préréglage « Astro » purement statique qui ne démarre jamais Node ; champ
+> « fichier d'entrée » refusant les `.mjs` ; résultat du build absent du
+> répertoire d'exécution ; `npm` hors du `PATH` ; process tué au bout de trois
+> secondes s'il n'écoute pas ; point d'entrée chargé en `require()`, donc
+> incompatible avec un `await` de premier niveau. Huit déploiements, aucun
+> succès. Hostinger reste l'hébergeur du **domaine** et de la **messagerie**.
 
 ## ✅ Déjà fait (code)
 
@@ -44,85 +31,91 @@ au démarrage : `ERR_MODULE_NOT_FOUND`.
   social** (og:image), **bandeaux photo** (Spécialité / Domaine / Contact).
 - **Keystatic Cloud** configuré : projet `thirion-david/thirion-expertise`
   (connexion client par e-mail).
-- **Adaptateur Node** (`@astrojs/node`, mode `standalone`) + script `npm start`.
+- **Adaptateur Cloudflare** (`@astrojs/cloudflare`) + `wrangler.jsonc`
+  (`nodejs_compat`).
 - Admin **en français** (`locale: 'fr-FR'` + `scripts/i18n-keystatic.cjs`).
 - Édition locale : `npm run dev` → http://localhost:4321/keystatic
-- **Formulaire de contact** : endpoint `/api/contact` qui envoie via l'**API HTTP
-  de Resend**, sans dépendance (un simple `fetch`).
-- **Vérifié en local sur Node 22** (`npm run build && npm start`) : `/` servie,
-  `/robots.txt` variable selon l'hôte, `/api/contact` exécuté, **`/keystatic`
-  répond 200**. C'était le seul maillon jamais testé côté Cloudflare — il est levé.
+- **Formulaire de contact** : `/api/contact` envoie via l'**API HTTP de Resend**
+  (un simple `fetch`, aucune dépendance — et HTTPS passe là où le SMTP sortant
+  est souvent bloqué).
+- **Sitemap** (`@astrojs/sitemap`), annoncé dans le `robots.txt` sur le seul
+  domaine canonique.
+- ✅ **`/keystatic` vérifié sur workerd** (`wrangler dev --local`) : répond 200.
+  C'était le seul maillon jamais testé du projet — le repli Netlify n'a plus
+  lieu d'être.
 
 ## ⬜ Reste à faire
 
-1. **hPanel → Sites web → Web Apps → Commencer**, import depuis GitHub
-   `jibenight/Thirion-expertise`. Réglages :
+1. **Compte Cloudflare du client** — s'authentifier en local :
 
-   | Champ | Valeur |
-   |---|---|
-   | Préréglage de framework | **`Express`** (surtout pas `Astro`) |
-   | Branche | `main` |
-   | Version de Node | `22.x` |
-   | Répertoire root | `./` |
-   | Commande de compilation | `npm run build` |
-   | Gestionnaire de paquets | `npm` |
-   | Répertoire de sortie | `dist` |
-   | **Fichier d'entrée** | **`server.js`** |
+   ```bash
+   npx wrangler login          # OAuth navigateur, rien à stocker
+   ```
 
-2. **Variables d'environnement** (même écran, section *Variables d'environnement*) :
+2. **Brancher le dépôt** : Cloudflare → **Workers & Pages** → **Create** →
+   **Import a repository** → `jibenight/Thirion-expertise`.
+   - ⚠️ C'est **Workers**, pas *Pages* (l'adaptateur ne déploie plus sur Pages).
+   - Build command : `npm run build`
+   - `nodejs_compat` et `compatibility_date` sont déjà dans `wrangler.jsonc`.
+   - Le KV `SESSION` est auto-provisionné.
 
-   | Nom | Valeur |
-   |---|---|
-   | `RESEND_API_KEY` | la clé Resend — **secret** |
-   | `CONTACT_TO` | `thirionexpertise@gmail.com` |
-   | `CONTACT_FROM` | `Thirion Expertise <contact@thirion-expertise.fr>` |
+   > Sans cette intégration Git, **rien ne se déploie au push** — c'est le piège
+   > dans lequel le projet est tombé en juillet : le Worker était déployé à la
+   > main par `wrangler deploy`, et trois jours de commits n'étaient jamais
+   > partis en ligne. À défaut d'intégration, `npx wrangler deploy` après chaque
+   > modification.
 
-3. **Domaine** : `thirion-expertise.fr` est déjà chez Hostinger mais **parqué**
-   (NS `lunar/solar.dns-parking.com`, aucun enregistrement A). Le rattacher à la
-   Web App depuis hPanel.
-
-4. **Formulaire de contact (Resend)** :
+3. **Formulaire de contact (Resend)** :
    - Compte sur **resend.com** (gratuit, 3 000 mails/mois).
    - **Vérifier le domaine** `thirion-expertise.fr` → coller les enregistrements
-     SPF/DKIM fournis dans le **DNS Hostinger**. Sans ça, l'envoi depuis
-     `contact@thirion-expertise.fr` est refusé. La vérification porte sur le
-     domaine : que `contact@` soit un alias de `david@` ne gêne pas.
-   - Créer la clé API et la poser en variable d'environnement (étape 2).
+     SPF/DKIM fournis **dans le DNS qui fait autorité** (voir étape 4). Sans ça,
+     l'envoi depuis `contact@thirion-expertise.fr` est refusé. La vérification
+     porte sur le domaine : que `contact@` soit un alias de `david@` ne gêne pas.
+   - Poser la clé en secret : `npx wrangler secret put RESEND_API_KEY`.
+   - `CONTACT_TO` / `CONTACT_FROM` sont déjà dans `wrangler.jsonc`.
    - Dev local : copier `.env.example` en `.env` et y mettre la clé.
 
-   > L'envoi passe par l'**API HTTP** de Resend (port 443), et non en SMTP.
-   > Un premier montage en `nodemailer` sur `smtp.hostinger.com` a été
-   > abandonné : les ports SMTP sortants sont fréquemment bloqués en mutualisé,
-   > et rien dans la documentation Hostinger ne permettait de le vérifier avant
-   > la mise en ligne. HTTPS retire cette inconnue.
+4. **Domaine `thirion-expertise.fr`** — aujourd'hui chez Hostinger, parqué
+   (NS `lunar/solar.dns-parking.com`).
+
+   > ⚠️ **Relever les enregistrements MX, SPF et DKIM avant toute manipulation.**
+   > La boîte `david@thirion-expertise.fr` et son alias `contact@` sont hébergés
+   > chez Hostinger : attacher un domaine à un Worker exige de basculer les
+   > nameservers vers Cloudflare, et les MX doivent être recréés à l'identique
+   > côté Cloudflare, sinon la messagerie du client tombe.
+
+   Puis ajouter le domaine personnalisé au Worker.
 
 5. **keystatic.cloud** → projet `thirion-david/thirion-expertise` → réglages →
    renseigner l'**URL de production** `https://thirion-expertise.fr`
    (autorise la connexion du client depuis cette adresse).
 
-6. **Supprimer le Worker Cloudflare** `thirion-expertise` une fois le site en
-   ligne chez Hostinger, pour ne pas laisser traîner une copie publique obsolète.
+6. **Nettoyer chez Hostinger** : supprimer la Web App Node, qui sert encore une
+   copie statique du site sur le domaine. Conserver le domaine et la messagerie.
 
 ## ⬜ À vérifier après mise en ligne
 
-7. **Le cycle d'édition complet** : le client va sur `thirion-expertise.fr/keystatic`,
-   se connecte **par e-mail**, modifie, **Enregistre** → Keystatic Cloud commite sur
-   GitHub → Hostinger redéploie automatiquement → la modification est en ligne.
-   C'est ce chaînage qu'il faut tester de bout en bout une fois.
+7. **Un vrai envoi depuis le formulaire**, pour confirmer la configuration Resend
+   de bout en bout.
 
-8. **Temps de chargement de l'accueil** : les 14 photos du diaporama pèsent ~5 Mo
-   au total (1400 px, qualité 68). Le carrousel ne charge que l'image courante et
-   la suivante, mais un mutualisé n'est pas un CDN. Si le premier affichage est
-   lent, mettre Cloudflare devant en proxy DNS (cache seul, sans y héberger).
+8. **Le cycle d'édition complet** : le client va sur `thirion-expertise.fr/keystatic`,
+   se connecte **par e-mail**, modifie, **Enregistre** → Keystatic Cloud commite sur
+   GitHub → Cloudflare redéploie → la modification est en ligne. C'est ce
+   chaînage qu'il faut tester une fois de bout en bout.
+
+9. **Déclarer le sitemap** dans la Google Search Console :
+   `https://thirion-expertise.fr/sitemap-index.xml`.
 
 ## ℹ️ Notes
 
 - L'écran de **connexion hébergé par Keystatic Cloud** reste en anglais (hors de notre code).
 - Les **mentions légales** contiennent des `[À compléter]` (SIRET, forme juridique,
-  hébergeur — désormais Hostinger) — à renseigner via l'admin.
+  hébergeur) — à renseigner via l'admin.
 - Anciens visuels non référencés à supprimer après validation client :
   `hero-architecture*.jpg`, `hero-villa.jpg`, `hero-immeuble.jpg`,
   `david-thirion-retouched.jpg`, `thierry-thirion-retouched.jpg`.
+- Les 14 photos du diaporama pèsent ~5 Mo (1400 px, qualité 68). Le carrousel ne
+  charge que l'image courante et la suivante.
 
 ## Fichiers clés
 
@@ -132,5 +125,5 @@ au démarrage : `ERR_MODULE_NOT_FOUND`.
 | `src/content/*.yaml` | Le contenu |
 | `src/lib/content.ts` | Lecture du contenu au build (API Reader) |
 | `scripts/i18n-keystatic.cjs` | Francisation des libellés (postinstall) |
-| `astro.config.mjs` | Adaptateur Node (standalone) + intégrations |
-| `package.json` | `npm start` → `node ./server.js` |
+| `astro.config.mjs` | Adaptateur Cloudflare (build only) + intégrations |
+| `wrangler.jsonc` | `nodejs_compat` + variables non secrètes |
