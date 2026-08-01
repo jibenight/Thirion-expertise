@@ -7,8 +7,8 @@ export const prerender = false;
 const CANONICAL_HOST = 'thirion-expertise.fr';
 
 // Sur le vrai domaine → indexation autorisée.
-// Sur toute autre origine (démo *.workers.dev, préviews) → indexation interdite,
-// pour éviter que Google référence une URL temporaire (contenu dupliqué).
+// Sur toute autre origine (URL temporaire de l'hébergeur, préviews) → indexation
+// interdite, pour éviter que Google référence une URL provisoire (contenu dupliqué).
 export const GET: APIRoute = ({ request }) => {
   const host = (request.headers.get('host') ?? '').toLowerCase();
   const isCanonical = host === CANONICAL_HOST || host === `www.${CANONICAL_HOST}`;
