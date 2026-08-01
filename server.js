@@ -1,9 +1,9 @@
 // Point d'entrée Node pour Hostinger.
 //
 // hPanel valide le champ « Fichier d'entrée » sur l'extension `.js` et propose
-// en exemple un fichier du dépôt (`src/server.js`), pas un chemin dans le
-// dossier de build. Ce lanceur, versionné et donc toujours présent, démarre le
-// serveur autonome produit par `npm run build`.
+// en exemple un fichier du dépôt (`src/server.js`). Ce lanceur, versionné et
+// donc toujours présent, démarre le serveur produit par `npm run build`.
+import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -22,18 +22,34 @@ console.log(
     `, Node ${process.version}`,
 );
 
-// Hostinger recopie le résultat du build à côté de ce fichier, mais la
-// profondeur dépend de sa configuration : tantôt `dist/server/`, tantôt le
-// contenu du répertoire de sortie déposé à plat. On cherche donc l'entrée parmi
-// les emplacements plausibles plutôt que d'en coder un seul en dur.
 const here = dirname(fileURLToPath(import.meta.url));
-const CANDIDATES = ['dist/server/entry.mjs', 'server/entry.mjs', 'entry.mjs'];
 
-const found = CANDIDATES.find((candidate) => existsSync(join(here, candidate)));
+// La profondeur varie selon l'hébergeur : certains déposent le contenu du
+// répertoire de sortie à plat à côté de ce fichier.
+const CANDIDATES = ['dist/server/entry.mjs', 'server/entry.mjs', 'entry.mjs'];
+const locate = () => CANDIDATES.find((candidate) => existsSync(join(here, candidate)));
+
+let found = locate();
+
+// Hostinger clone le dépôt et installe les dépendances dans le répertoire
+// d'exécution, mais n'y recopie PAS le résultat du build : celui-ci reste dans
+// le répertoire de compilation, d'où il part vers la racine web. On compile donc
+// ici au premier démarrage — les sources et `node_modules` sont présents, et
+// l'opération prend deux à trois secondes.
+if (!found) {
+  console.log('[thirion-expertise] Build absent du répertoire d’exécution — compilation…');
+  const build = spawnSync('npm', ['run', 'build'], { cwd: here, stdio: 'inherit', shell: true });
+
+  if (build.status !== 0) {
+    console.error(`[thirion-expertise] La compilation a échoué (code ${build.status}).`);
+    process.exit(1);
+  }
+  found = locate();
+}
 
 if (!found) {
   console.error(
-    `[thirion-expertise] entry.mjs introuvable. Cherché : ${CANDIDATES.join(', ')}.\n` +
+    `[thirion-expertise] entry.mjs introuvable après compilation. Cherché : ${CANDIDATES.join(', ')}.\n` +
       `Contenu de ${here} : ${readdirSync(here).join(', ')}`,
   );
   process.exit(1);
