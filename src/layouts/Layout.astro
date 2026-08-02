@@ -6,6 +6,9 @@ import '../styles/global.css';
 const { title = 'THIRION EXPERTISE', description = "Cabinet d'expertise immobilière à Nîmes." } = Astro.props;
 const params = await getParametres();
 const ogImage = params.ogImage ? new URL(params.ogImage, Astro.site).href : undefined;
+// Le site répond sur `thirion-expertise.fr` ET sur `www.` : on déclare l'URL
+// canonique sur le domaine sans www, pour que Google n'y voie pas deux sites.
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
 ---
 <!doctype html>
 <html lang="fr">
@@ -15,6 +18,8 @@ const ogImage = params.ogImage ? new URL(params.ogImage, Astro.site).href : unde
     <meta name="description" content={description} />
     <meta name="theme-color" content="#1a3a7e" />
     <meta name="author" content="THIRION EXPERTISE" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:url" content={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />

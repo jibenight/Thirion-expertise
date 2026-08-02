@@ -5,6 +5,16 @@
   "compatibility_date": "2026-07-01",
   "compatibility_flags": ["nodejs_compat"],
 
+  // Domaines servis par le Worker. Déclarés ici plutôt qu'ajoutés à la main dans
+  // le dashboard : ils sont ainsi versionnés et réappliqués à chaque
+  // déploiement. Cloudflare remplace lui-même les enregistrements DNS
+  // correspondants. Les deux hôtes servent le même contenu ; la balise
+  // `rel=canonical` du layout désigne la version sans www.
+  "routes": [
+    { "pattern": "thirion-expertise.fr", "custom_domain": true },
+    { "pattern": "www.thirion-expertise.fr", "custom_domain": true }
+  ],
+
   // Formulaire de contact (endpoint /api/contact, envoi via Resend).
   // Variables non secrètes ci-dessous ; la clé API se pose en secret :
   //     npx wrangler secret put RESEND_API_KEY
