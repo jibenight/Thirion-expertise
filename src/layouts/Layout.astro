@@ -3,7 +3,14 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { getParametres } from '../lib/content';
 import '../styles/global.css';
-const { title = 'THIRION EXPERTISE', description = "Cabinet d'expertise immobilière à Nîmes." } = Astro.props;
+// `noindex` : pour les pages qui ne correspondent pas à une URL stable — la 404,
+// servie à la place de n'importe quelle adresse. Y déclarer une canonique
+// désignerait `/404/` comme l'original de la page demandée, ce qui est faux.
+const {
+  title = 'THIRION EXPERTISE',
+  description = "Cabinet d'expertise immobilière à Nîmes.",
+  noindex = false,
+} = Astro.props;
 const params = await getParametres();
 const ogImage = params.ogImage ? new URL(params.ogImage, Astro.site).href : undefined;
 // Le site répond sur `thirion-expertise.fr` ET sur `www.` : on déclare l'URL
@@ -18,8 +25,14 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
     <meta name="description" content={description} />
     <meta name="theme-color" content="#1a3a7e" />
     <meta name="author" content="THIRION EXPERTISE" />
-    <link rel="canonical" href={canonical} />
-    <meta property="og:url" content={canonical} />
+    {noindex ? (
+      <meta name="robots" content="noindex" />
+    ) : (
+      <>
+        <link rel="canonical" href={canonical} />
+        <meta property="og:url" content={canonical} />
+      </>
+    )}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />

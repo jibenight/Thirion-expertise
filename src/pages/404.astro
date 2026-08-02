@@ -1,0 +1,75 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageShell from '../components/PageShell.astro';
+import Icon from '../components/Icon.astro';
+import { getParametres, telHref } from '../lib/content';
+
+// Page pré-rendue en `404.html` : Cloudflare la sert automatiquement, avec le
+// bon statut HTTP, pour toute URL qui ne correspond à aucune route.
+//
+// Contenu volontairement codé en dur plutôt qu'exposé dans Keystatic : c'est de
+// la mécanique de site, pas du contenu éditorial, et l'admin resterait
+// encombrée d'une rubrique que le client n'ouvrirait jamais.
+const params = await getParametres();
+const tel = telHref(params.telephone);
+
+const liens = [
+  { href: '/', label: 'Accueil' },
+  { href: '/specialite/', label: 'Spécialité' },
+  { href: '/domaine/', label: 'Domaine' },
+  { href: '/intervenants/', label: 'Intervenants' },
+  { href: '/contact/', label: 'Contact' },
+];
+---
+<Layout
+  title="Page introuvable — THIRION EXPERTISE"
+  description="Cette page n'existe pas ou a été déplacée."
+  noindex
+>
+  <PageShell eyebrow="Erreur 404" title="Page introuvable">
+    <div class="max-w-2xl" data-reveal>
+      <p class="text-lg leading-relaxed text-foreground/80">
+        La page que vous cherchez n'existe pas, ou son adresse a changé.
+      </p>
+
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a
+          href="/"
+          class="motion-button inline-flex items-center rounded-md bg-brand px-5 py-3 text-sm font-medium text-white transition hover:bg-brand/90"
+        >
+          <span class="relative z-10">Retour à l'accueil</span>
+        </a>
+        <a
+          href="/contact/"
+          class="motion-button inline-flex items-center rounded-md border border-brand/30 bg-white/70 px-5 py-3 text-sm font-medium text-brand transition hover:bg-white"
+        >
+          <span class="relative z-10">Nous contacter</span>
+        </a>
+      </div>
+
+      <nav class="mt-12 border-t border-border/70 pt-8" aria-label="Pages du site">
+        <h2 class="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          Toutes les pages
+        </h2>
+        <ul class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+          {liens.map((lien) => (
+            <li>
+              <a href={lien.href} class="motion-link text-brand hover:underline">{lien.label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <p class="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-foreground/70">
+        <span class="inline-flex items-center gap-2">
+          <Icon name="phone" class="h-4 w-4 shrink-0 text-brand" />
+          <a href={`tel:${tel}`} class="motion-link hover:text-brand">{params.telephone}</a>
+        </span>
+        <span class="inline-flex items-center gap-2">
+          <Icon name="mail" class="h-4 w-4 shrink-0 text-brand" />
+          <a href={`mailto:${params.email}`} class="motion-link break-all hover:text-brand">{params.email}</a>
+        </span>
+      </p>
+    </div>
+  </PageShell>
+</Layout>
